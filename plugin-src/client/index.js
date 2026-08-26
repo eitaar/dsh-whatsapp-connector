@@ -128,7 +128,7 @@ export function IMSettingsTab({
         : null,
       h(WhatsappSettingsTab, { rpcCall: rpcCalls.whatsappRpcCall }),
     ),
-  ));
+  )));
 }
 
 export function apply(ctx) {
