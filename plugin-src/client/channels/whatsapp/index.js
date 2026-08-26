@@ -15,7 +15,6 @@ import {
   ChannelListHeading,
   LastMessageErrorSummary,
 } from '../../channel-card-meta.js';
-import { installDingtalkStyles } from '../dingtalk/styles.js';
 import {
   WHATSAPP_ENDPOINTS,
   formatRemaining,
@@ -381,13 +380,11 @@ export function WhatsappSettingsTab({ rpcCall }) {
   const addButtonRef = React.useRef(null);
 
   React.useEffect(() => {
-    const disposeDingtalk = installDingtalkStyles();
     const disposeWhatsapp = installWhatsappStyles();
     mounted.current = true;
     return () => {
       mounted.current = false;
       disposeWhatsapp();
-      disposeDingtalk();
     };
   }, []);
 
