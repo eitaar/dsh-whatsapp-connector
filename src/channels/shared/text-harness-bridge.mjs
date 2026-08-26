@@ -69,7 +69,7 @@ function canClaimInteractionReply(message, pending, senderId) {
     && Boolean(cleanText(message.content));
 }
 
-function artifactFailureText(fileName, error, descriptor) {
+function artifactFailureText(fileName, error) {
   const name = String(fileName ?? t('结果文件'))
     .replace(/[\r\n]+/g, ' ')
     .trim()
@@ -78,16 +78,7 @@ function artifactFailureText(fileName, error, descriptor) {
     case 'artifact-delivery-uncertain':
       return t('结果文件「{name}」的发送结果未能确认，请先检查聊天内是否已收到，不要立即重试。', { name });
     case 'artifact-permission-required':
-      if (descriptor?.key === 'slack') {
-        return t('结果文件「{name}」已生成，但 Slack 应用缺少 files:write 权限。请更新 Manifest、重新安装应用并重新连接机器人后重试。', { name });
-      }
-      if (descriptor?.key === 'discord') {
-        return t('结果文件「{name}」已生成，但机器人缺少 Discord 的 Send Messages、Attach Files 或 Read Message History 权限。', { name });
-      }
-      if (descriptor?.key === 'telegram') {
-        return t('结果文件「{name}」已生成，但 Telegram 不允许机器人在当前聊天发送文档，请检查聊天权限。', { name });
-      }
-      return t('结果文件「{name}」已生成，但当前机器人没有文件发送权限，请检查渠道权限。', { name });
+      return t('结果文件「{name}」已生成，但当前机器人没有文件发送权限，请检查 WhatsApp 账号权限。', { name });
     case 'artifact-too-large':
       return t('结果文件「{name}」超过当前渠道大小上限，未发送。', { name });
     case 'artifact-empty':
@@ -502,7 +493,7 @@ export class TextHarnessBridge {
         ? (file) => this.#bot.sendFile(target, file)
         : undefined,
       onFailure: (artifact, error) => setLastMessageFailure(this.#status, error, {
-        userMessage: artifactFailureText(artifact?.fileName, error, this.#descriptor),
+        userMessage: artifactFailureText(artifact?.fileName, error),
         reason: error?.code,
       }),
       sendFailureNotice: (_artifact, _error, failure) => this.#bot.sendText(

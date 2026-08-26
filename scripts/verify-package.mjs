@@ -25,29 +25,30 @@ const required = [
   'cordis.patch.yml',
   'README.md',
   'THIRD_PARTY_NOTICES.md',
-  'plugin-src/client/channels/dingtalk/index.js',
-  'plugin-src/client/channels/slack/index.js',
+  'licenses/baileys-MIT.txt',
+  'licenses/libsignal-GPL-3.0.txt',
+  'licenses/protobufjs-BSD-3-Clause.txt',
+  'licenses/sharp-Apache-2.0.txt',
+  'licenses/sharp-libvips-LGPL-3.0-or-later.txt',
+  'licenses/qrcode-MIT.txt',
+  'licenses/esbuild-MIT.txt',
+  'licenses/react-MIT.txt',
+  'licenses/react-dom-MIT.txt',
+  'licenses/react-test-renderer-MIT.txt',
   'plugin-src/client/i18n.js',
-  'plugin-src/host/channels/feishu/index.mjs',
-  'plugin-src/host/channels/weixin/index.mjs',
-  'plugin-src/host/channels/dingtalk/index.mjs',
-  'plugin-src/host/channels/qq/index.mjs',
-  'plugin-src/host/channels/slack/index.mjs',
-  'plugin-src/host/channels/wecom/index.mjs',
-  'plugin-src/host/channels/telegram/index.mjs',
-  'plugin-src/host/channels/discord/index.mjs',
+  'plugin-src/client/channels/whatsapp/index.js',
+  'plugin-src/client/channels/whatsapp/styles.js',
   'plugin-src/host/channels/whatsapp/index.mjs',
-  'src/channels/feishu/feishu-runtime.mjs',
-  'src/channels/weixin/weixin-runtime.mjs',
-  'src/channels/dingtalk/dingtalk-runtime.mjs',
-  'src/channels/qq/qq-runtime.mjs',
-  'src/channels/slack/slack-runtime.mjs',
-  'src/channels/wecom/wecom-runtime.mjs',
-  'src/channels/telegram/telegram-runtime.mjs',
-  'src/channels/discord/discord-runtime.mjs',
   'src/channels/whatsapp/whatsapp-runtime.mjs',
   'src/channels/whatsapp/whatsapp-web-session.mjs',
 ];
+const removedChannels = ['dingtalk', 'discord', 'feishu', 'office', 'qq', 'slack', 'telegram', 'wecom', 'weixin'];
+const channelRootEntries = await readdir(resolve(root, 'src/channels'), { withFileTypes: true });
+for (const name of removedChannels) {
+  if (channelRootEntries.some((entry) => entry.isDirectory() && entry.name === name)) {
+    throw new Error(`non-WhatsApp source channel remains: src/channels/${name}`);
+  }
+}
 await Promise.all(required.map((path) => access(resolve(root, path))));
 
 const [
@@ -59,6 +60,7 @@ const [
   hostSource,
   clientEntrySource,
   clientSources,
+  hostSources,
   executable,
 ] = await Promise.all([
   readFile(resolve(root, 'lib/client.js'), 'utf8'),
@@ -69,6 +71,7 @@ const [
   readFile(resolve(root, 'plugin-src/host/index.mjs'), 'utf8'),
   readFile(resolve(root, 'plugin-src/client/index.js'), 'utf8'),
   readSourceTree(resolve(root, 'plugin-src/client')),
+  readSourceTree(resolve(root, 'plugin-src/host')),
   stat(resolve(root, 'bin/dsh-im.mjs')),
 ]);
 const manifest = JSON.parse(manifestText);
@@ -138,10 +141,11 @@ if (!client.includes('container-type: inline-size')
   || !client.includes('@container (max-width: 680px)')) {
   throw new Error('client bundle does not contain the narrow-panel DingTalk QR layout');
 }
-for (const marker of ['/feishu', '/weixin', '/dingtalk', '/wecom', '/qq', '/slack', '/telegram', '/discord', '/whatsapp']) {
-  if (!host.includes(marker)) {
-    throw new Error(`host bundle does not contain the internal ${marker} RPC provider`);
-  }
+if (!host.includes('/whatsapp')) {
+  throw new Error('host bundle does not contain the internal /whatsapp RPC provider');
+}
+if ((host.match(/\[\[\s*["']whatsapp["']/gu) ?? []).length !== 1) {
+  throw new Error('host bundle must register exactly one WhatsApp channel');
 }
 for (const marker of ['/session Session ID', 'bindWorkspaceSession', 'session-subagent-unsupported']) {
   if (!host.includes(marker)) {
@@ -151,8 +155,31 @@ for (const marker of ['/session Session ID', 'bindWorkspaceSession', 'session-su
 if (/@xmanrui\/dsh-(?:feishu|weixin|dingtalk)/.test(host)) {
   throw new Error('host bundle still imports an external channel plugin');
 }
+const removedImportPattern = /channels\/(?:dingtalk|discord|feishu|office|qq|slack|telegram|wecom|weixin)(?:\/|['"])/u;
+if (removedImportPattern.test(hostSources) || removedImportPattern.test(clientSources)) {
+  throw new Error('source still imports a removed channel');
+}
+const removedExecutableMarkers = [
+  'applyDingtalk', 'applyDiscord', 'applyFeishu', 'applyOffice',
+  'applyQq', 'applySlack', 'applyTelegram', 'applyWecom', 'applyWeixin',
+  'DingtalkSettingsTab', 'DiscordSettingsTab', 'FeishuSettingsTab',
+  'OfficeSettingsTab', 'QqSettingsTab', 'SlackSettingsTab',
+  'TelegramSettingsTab', 'WecomSettingsTab', 'WeixinSettingsTab',
+];
+for (const marker of removedExecutableMarkers) {
+  if (hostSource.includes(marker) || clientEntrySource.includes(marker)
+    || host.includes(marker) || client.includes(marker)) {
+    throw new Error(`removed channel executable marker remains: ${marker}`);
+  }
+}
+const forbiddenRuntimeArtifactPattern = /(?:^|\/)(?:node_modules|auth|auth_info_baileys|credentials|runtime-state|runtime_state)(?:\/|$)/iu;
+for (const path of manifest.files ?? []) {
+  if (forbiddenRuntimeArtifactPattern.test(path)) {
+    throw new Error(`forbidden runtime artifact is published: ${path}`);
+  }
+}
 if (/@xmanrui\/dsh-(?:feishu|weixin|dingtalk)/.test(
-  manifestText + lockText + hostSource + clientSources,
+  manifestText + lockText + hostSources + clientSources,
 )) {
   throw new Error('source or package metadata still depends on an external channel plugin');
 }
@@ -165,10 +192,6 @@ for (const name of ['@xmanrui/dsh-feishu', '@xmanrui/dsh-weixin', '@xmanrui/dsh-
   }
 }
 const directDependencies = {
-  'dingtalk-stream': '2.1.4',
-  '@tencent-connect/qqbot-connector': '1.2.0',
-  '@tencent-connect/qqbot-nodejs': '1.0.4',
-  '@wecom/aibot-node-sdk': '1.0.7',
   qrcode: '1.5.4',
 };
 for (const [name, version] of Object.entries(directDependencies)) {
@@ -176,10 +199,13 @@ for (const [name, version] of Object.entries(directDependencies)) {
     throw new Error(`${name} must be a pinned direct dependency at ${version}`);
   }
 }
+for (const name of ['dingtalk-stream', '@tencent-connect/qqbot-connector', '@tencent-connect/qqbot-nodejs', '@wecom/aibot-node-sdk']) {
+  if (manifest.dependencies?.[name] !== undefined) {
+    throw new Error(`${name} must not remain a WhatsApp-only runtime dependency`);
+  }
+}
 const bundledBuildDependencies = {
-  '@larksuiteoapi/node-sdk': '1.73.0',
   '@whiskeysockets/baileys': '7.0.0-rc14',
-  'https-proxy-agent': '5.0.1',
 };
 for (const [name, version] of Object.entries(bundledBuildDependencies)) {
   if (manifest.dependencies?.[name] !== undefined) {
@@ -195,8 +221,8 @@ if (lock.packages?.['node_modules/protobufjs']?.dev !== true) {
 if (manifest.bin?.['dsh-im'] !== 'bin/dsh-im.mjs') {
   throw new Error('package manifest must publish the dsh-im executable');
 }
-if (/(?:from\s*|import\s*\(|require\s*\()\s*["'](?:@larksuiteoapi\/node-sdk|@whiskeysockets\/baileys|https-proxy-agent|protobufjs)(?:\/[^"']*)?["']/.test(host)) {
-  throw new Error('host bundle must not import a bundled SDK, proxy agent, or protobufjs at runtime');
+if (/(?:from\s*|import\s*\(|require\s*\()\s*["'](?:@whiskeysockets\/baileys|protobufjs)(?:\/[^"']*)?["']/.test(host)) {
+  throw new Error('host bundle must not import a bundled SDK or protobufjs at runtime');
 }
 if ((executable.mode & 0o111) === 0) throw new Error('dsh-im CLI is not executable');
 if (/private-bot-token|must-be-rolled-back|DEEPSEEK_API_KEY=/.test(client + host)) {

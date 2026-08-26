@@ -1,12 +1,3 @@
-import { apply as applyDingtalk } from './channels/dingtalk/index.mjs';
-import { apply as applyDiscord } from './channels/discord/index.mjs';
-import { apply as applyOffice } from './channels/office/index.mjs';
-import { apply as applyFeishu } from './channels/feishu/index.mjs';
-import { apply as applyQq } from './channels/qq/index.mjs';
-import { apply as applySlack } from './channels/slack/index.mjs';
-import { apply as applyTelegram } from './channels/telegram/index.mjs';
-import { apply as applyWecom } from './channels/wecom/index.mjs';
-import { apply as applyWeixin } from './channels/weixin/index.mjs';
 import { apply as applyWhatsapp } from './channels/whatsapp/index.mjs';
 import { installOutboundArtifactTool } from '../../src/channels/shared/semantic/artifact.mjs';
 import { setImHostLanguage } from '../../src/channels/shared/i18n.mjs';
@@ -27,28 +18,8 @@ function channelConfig(config, name) {
 }
 
 export function createImHostPlugin(internals = {}) {
-  const startFeishu = internals.applyFeishu ?? applyFeishu;
-  const startWeixin = internals.applyWeixin ?? applyWeixin;
-  const startDingtalk = internals.applyDingtalk ?? applyDingtalk;
-  const startWecom = internals.applyWecom ?? applyWecom;
-  const startQq = internals.applyQq ?? applyQq;
-  const startSlack = internals.applySlack ?? applySlack;
-  const startTelegram = internals.applyTelegram ?? applyTelegram;
-  const startDiscord = internals.applyDiscord ?? applyDiscord;
-  const startOffice = internals.applyOffice ?? applyOffice;
   const startWhatsapp = internals.applyWhatsapp ?? applyWhatsapp;
-  const channels = [
-    ['feishu', startFeishu],
-    ['weixin', startWeixin],
-    ['dingtalk', startDingtalk],
-    ['wecom', startWecom],
-    ['qq', startQq],
-    ['slack', startSlack],
-    ['telegram', startTelegram],
-    ['discord', startDiscord],
-    ['whatsapp', startWhatsapp],
-    ['office', startOffice],
-  ];
+  const channels = [['whatsapp', startWhatsapp]];
   return Object.freeze({
     name,
     inject,
