@@ -167,4 +167,3 @@ Complete. Removed Slack/Discord/Telegram-specific artifact permission branches, 
 
 - sharp-libvips publishes SPDX metadata but no license text file; the shipped LGPL text is the system's authoritative GNU license text.
 - The SDD plan/ledger files and pre-existing untracked `docs/` content remain unstaged.
-
