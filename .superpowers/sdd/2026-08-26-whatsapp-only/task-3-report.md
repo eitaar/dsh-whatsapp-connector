@@ -102,7 +102,7 @@ Complete. Removed non-WhatsApp host locale modules and aggregate imports, remove
 
 ### Commit
 
-`869b19b865664277be76a57f7f15e0857cd88cb1` — `fix: remove legacy shared locale and CSS`
+`6b85baa713d8a95f3eeb0909eb1c5f56b2603f29` — `fix: remove legacy shared locale and CSS`
 
 ### Concerns
 
