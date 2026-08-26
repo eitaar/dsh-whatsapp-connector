@@ -176,9 +176,7 @@ for (const name of ['dingtalk-stream', '@tencent-connect/qqbot-connector', '@ten
   }
 }
 const bundledBuildDependencies = {
-  '@larksuiteoapi/node-sdk': '1.73.0',
   '@whiskeysockets/baileys': '7.0.0-rc14',
-  'https-proxy-agent': '5.0.1',
 };
 for (const [name, version] of Object.entries(bundledBuildDependencies)) {
   if (manifest.dependencies?.[name] !== undefined) {
@@ -194,8 +192,8 @@ if (lock.packages?.['node_modules/protobufjs']?.dev !== true) {
 if (manifest.bin?.['dsh-im'] !== 'bin/dsh-im.mjs') {
   throw new Error('package manifest must publish the dsh-im executable');
 }
-if (/(?:from\s*|import\s*\(|require\s*\()\s*["'](?:@larksuiteoapi\/node-sdk|@whiskeysockets\/baileys|https-proxy-agent|protobufjs)(?:\/[^"']*)?["']/.test(host)) {
-  throw new Error('host bundle must not import a bundled SDK, proxy agent, or protobufjs at runtime');
+if (/(?:from\s*|import\s*\(|require\s*\()\s*["'](?:@whiskeysockets\/baileys|protobufjs)(?:\/[^"']*)?["']/.test(host)) {
+  throw new Error('host bundle must not import a bundled SDK or protobufjs at runtime');
 }
 if ((executable.mode & 0o111) === 0) throw new Error('dsh-im CLI is not executable');
 if (/private-bot-token|must-be-rolled-back|DEEPSEEK_API_KEY=/.test(client + host)) {

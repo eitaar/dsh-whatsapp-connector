@@ -1,7 +1,7 @@
 {
   "name": "@xmanrui/dsh-im",
   "version": "3.0.1",
-  "description": "把九种 IM 机器人和公网 AI Office 接入本机 DeepSeek Harness。 Connect nine IM channels and a public AI Office to a local DeepSeek Harness.",
+  "description": "将 WhatsApp Web 接入本机 DeepSeek Harness。 Connect WhatsApp Web to a local DeepSeek Harness.",
   "keywords": [
     "deepseek-harness",
     "dsh",
@@ -10,17 +10,7 @@
     "im",
     "instant-messaging",
     "chatbot",
-    "feishu",
-    "lark",
-    "wechat",
-    "wecom",
-    "dingtalk",
-    "qq",
-    "slack",
-    "telegram",
-    "discord",
-    "whatsapp",
-    "ai-office"
+    "whatsapp"
   ],
   "author": {
     "name": "xmanrui",
@@ -97,10 +87,8 @@
     "qrcode": "1.5.4"
   },
   "devDependencies": {
-    "@larksuiteoapi/node-sdk": "1.73.0",
     "@whiskeysockets/baileys": "7.0.0-rc14",
     "esbuild": "0.25.9",
-    "https-proxy-agent": "5.0.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-test-renderer": "18.3.1"

@@ -28,6 +28,12 @@ test('manifest keeps only WhatsApp runtime dependencies', async () => {
   assert.equal(manifest.devDependencies?.['@whiskeysockets/baileys'], '7.0.0-rc14');
 });
 
+test('documentation describes WhatsApp only', async () => {
+  const readme = await read('README.en.md');
+  assert.match(readme, /WhatsApp/);
+  for (const channel of removed) assert.doesNotMatch(readme, new RegExp(`\\| ${channel} \\|`, 'i'));
+});
+
 test('bundle patch retains DSH compatibility identity', async () => {
   const patch = await read('cordis.patch.yml');
   assert.match(patch, /name: '@xmanrui\/dsh-im'/);
