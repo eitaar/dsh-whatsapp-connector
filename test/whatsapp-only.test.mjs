@@ -55,7 +55,11 @@ test('retained client metadata names WhatsApp only', async () => {
     read('plugin-src/client/i18n.js'),
     read('plugin-src/client/styles.js'),
   ]);
-  assert.doesNotMatch(locale, /AI Office|Office|IM channels|IM 渠道/);
+  assert.match(locale, /'IM 渠道': 'IM channels'/);
+  for (const stale of [
+    'Feishu', '飞书', 'DingTalk', '钉钉', 'WeCom', '企业微信',
+    'WeChat', '微信', 'QQ', 'AI Office', 'Office',
+  ]) assert.doesNotMatch(locale, new RegExp(stale), `locale contains ${stale}`);
   for (const selector of ['dim-logoWeixin', 'dim-logoFeishu', 'dim-logoDingtalk', 'dim-logoQq', 'dim-logoWecom', 'dim-logoTelegram', 'dim-logoOffice', 'dim-logoDiscord', 'dim-logoSlack']) {
     assert.doesNotMatch(styles, new RegExp(`\\.${selector}\\\\b`), `styles contain ${selector}`);
   }
