@@ -161,7 +161,7 @@ Complete. Removed Slack/Discord/Telegram-specific artifact permission branches, 
 
 ### Commit
 
-`21785fa` — `fix: add bundled license coverage and WhatsApp artifact checks`
+`d27cf799630b0e032a17b4ef42a0abf79c1d7f35` — `fix: add bundled license coverage and WhatsApp artifact checks`
 
 ### Concerns
 
