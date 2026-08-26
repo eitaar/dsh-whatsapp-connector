@@ -55,3 +55,24 @@ Complete. Review findings were addressed without changing the SDD plan or ledger
 
 - The locale still contains legacy channel-specific operational messages used only as inert fallback keys; retained runtime imports are WhatsApp-only. The removed generic labels and logo selectors were confirmed unused.
 - Untracked `docs/` content was not staged or modified.
+
+## Fix round 2
+
+### Status
+
+Complete. Removed stale non-WhatsApp locale and metadata entries from the source and regenerated client bundle, while preserving the English `IM 渠道` accessibility label.
+
+### Verification
+
+- `npm test -- --test-name-pattern='retained client metadata|WhatsApp stream'`: exit 0; 10 passed, 0 failed.
+- `npm run check`: exit 0; Host and Client built, 10 tests passed, `Verified dsh-im package artifacts.`
+- Locale reference inspection: source and `lib/client.js` contain no Feishu/DingTalk/WeCom/WeChat/QQ/Telegram/Discord/Slack/Office locale references.
+- `git diff --check`: exit 0.
+
+### Commit
+
+`edf6a8acb7db94b5fdf0d982ca44b5340080f632` — `fix: remove stale non-WhatsApp client locales`
+
+### Concerns
+
+- The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
