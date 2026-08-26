@@ -38,3 +38,25 @@ test('bundle patch retains DSH compatibility identity', async () => {
   const patch = await read('cordis.patch.yml');
   assert.match(patch, /name: '@xmanrui\/dsh-im'/);
 });
+
+test('third-party notices identify retained packages and copyleft assets', async () => {
+  const notices = await read('THIRD_PARTY_NOTICES.md');
+  for (const packageName of ['@whiskeysockets/baileys', 'qrcode', 'esbuild', 'react', 'react-dom', 'react-test-renderer', 'protobufjs', 'libsignal', 'sharp', '@img/sharp-libvips']) {
+    assert.match(notices, new RegExp(packageName.replaceAll('/', '\\/'), 'i'), packageName);
+  }
+  assert.match(notices, /GPL-3\.0/);
+  assert.match(notices, /LGPL-3\.0-or-later/);
+  assert.match(notices, /Facebook, Inc\. and its affiliates/);
+  assert.match(notices, /Rajeh Taher\/WhiskeySockets/);
+});
+
+test('retained client metadata names WhatsApp only', async () => {
+  const [locale, styles] = await Promise.all([
+    read('plugin-src/client/i18n.js'),
+    read('plugin-src/client/styles.js'),
+  ]);
+  assert.doesNotMatch(locale, /AI Office|Office|IM channels|IM 渠道/);
+  for (const selector of ['dim-logoWeixin', 'dim-logoFeishu', 'dim-logoDingtalk', 'dim-logoQq', 'dim-logoWecom', 'dim-logoTelegram', 'dim-logoOffice', 'dim-logoDiscord', 'dim-logoSlack']) {
+    assert.doesNotMatch(styles, new RegExp(`\\.${selector}\\\\b`), `styles contain ${selector}`);
+  }
+});
