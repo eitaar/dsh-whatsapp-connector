@@ -108,3 +108,35 @@ Complete. Removed non-WhatsApp host locale modules and aggregate imports, remove
 
 - WhatsApp’s own bundled channel stylesheet intentionally retains `ddt-*`/`dwa-*` compatibility selectors; the cleanup test targets shared CSS only.
 - The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
+
+## Final fix round
+
+### Status
+
+Complete. Added the retained English translation for `扫码接入已取消。` in the WhatsApp locale and regenerated the host artifact. The focused regression assertion was added before the locale change and observed failing.
+
+### Red/green verification
+
+- **RED:** `npm test -- --test-name-pattern='retained English locale translates WhatsApp scan cancellation'`
+  - Result: exit 1; 12 tests ran, 11 passed, 1 failed.
+  - Failure: `retained English locale translates WhatsApp scan cancellation`; the retained locale lacked the English mapping.
+- **GREEN:** `npm test -- --test-name-pattern='retained English locale translates WhatsApp scan cancellation'`
+  - Result: exit 0; 12 tests passed, 0 failed.
+
+### Verification
+
+- `npm run check`
+  - Result: exit 0; Host and Client built, 12 tests passed, `Verified dsh-im package artifacts.`
+- `npm pack --dry-run`
+  - Result: exit 0; `@xmanrui/dsh-im@3.0.1`, 84 files, package `xmanrui-dsh-im-3.0.1.tgz`.
+- `git diff --check`
+  - Result: exit 0; no output.
+
+### Commit
+
+`0dc3ffc67a2a2c34c8df0439202a9ed4cd2dc6de` — `fix: translate WhatsApp scan cancellation in English`
+
+### Concerns
+
+- `lib/index.js` changed because the host bundle embeds the retained host-side locale dictionary; `lib/client.js` was rebuilt and remained byte-identical.
+- The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
