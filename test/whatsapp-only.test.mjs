@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -48,6 +48,19 @@ test('third-party notices identify retained packages and copyleft assets', async
   assert.match(notices, /LGPL-3\.0-or-later/);
   assert.match(notices, /Facebook, Inc\. and its affiliates/);
   assert.match(notices, /Rajeh Taher\/WhiskeySockets/);
+});
+
+test('shared locale aggregate and CSS contain only retained identifiers', async () => {
+  const [aggregate, styles, localeFiles] = await Promise.all([
+    read('src/channels/shared/i18n-en.mjs'),
+    read('plugin-src/client/styles.js'),
+    readdir(new URL('src/channels/shared/i18n-en/', root)),
+  ]);
+  for (const channel of [...removed, 'bxf', 'dxw', 'ddt', 'dqq', 'dwecom', 'dsl', 'dwa']) {
+    assert.doesNotMatch(aggregate, new RegExp(channel, 'i'));
+    assert.doesNotMatch(styles, new RegExp(channel, 'i'));
+  }
+  assert.deepEqual(localeFiles.sort(), ['shared-a.mjs', 'shared-b.mjs', 'shared-c.mjs', 'whatsapp.mjs']);
 });
 
 test('retained client metadata names WhatsApp only', async () => {

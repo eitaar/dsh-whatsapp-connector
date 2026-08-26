@@ -76,3 +76,35 @@ Complete. Removed stale non-WhatsApp locale and metadata entries from the source
 ### Concerns
 
 - The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
+
+## Fix round 3
+
+### Status
+
+Complete. Removed non-WhatsApp host locale modules and aggregate imports, removed unreachable non-WhatsApp selectors from shared client CSS, regenerated `lib/client.js`, and preserved WhatsApp channel-specific styles.
+
+### Red/green verification
+
+- **RED:** `npm test -- --test-name-pattern='shared locale aggregate and CSS'`
+  - Result: exit 1; 10 passed, 1 failed.
+  - Failure: `shared locale aggregate and CSS contain only retained identifiers`; stale `dingtalk` aggregate import matched.
+- **GREEN:** `npm test -- --test-name-pattern='shared locale aggregate and CSS'`
+  - Result: exit 0; 11 passed, 0 failed.
+
+### Verification
+
+- `npm run check`
+  - Result: exit 0; Host and Client built, 11 tests passed, `Verified dsh-im package artifacts.`
+- `npm pack --dry-run`
+  - Result: exit 0; `@xmanrui/dsh-im@3.0.1`, 84 files; retained locale files listed were `shared-a.mjs`, `shared-b.mjs`, `shared-c.mjs`, and `whatsapp.mjs`.
+- `git diff --check`
+  - Result: exit 0.
+
+### Commit
+
+`869b19b865664277be76a57f7f15e0857cd88cb1` — `fix: remove legacy shared locale and CSS`
+
+### Concerns
+
+- WhatsApp’s own bundled channel stylesheet intentionally retains `ddt-*`/`dwa-*` compatibility selectors; the cleanup test targets shared CSS only.
+- The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
