@@ -11,6 +11,7 @@ export default {
   'WhatsApp 已绑定，消息连接暂未就绪。': 'WhatsApp is linked, but the messaging connection is not ready yet.',
   'WhatsApp 已扫码，但无法保存关联设备。': 'The QR code was scanned, but the linked device could not be saved.',
   '无法连接 WhatsApp，请重新生成二维码。': 'Unable to connect to WhatsApp. Please generate a new QR code.',
+  '扫码接入已取消。': 'The QR code connection was cancelled.',
 
   'WhatsApp账号': 'WhatsApp account',
   ' Web 关联设备': ' Web linked device',

@@ -63,6 +63,11 @@ test('shared locale aggregate and CSS contain only retained identifiers', async 
   assert.deepEqual(localeFiles.sort(), ['shared-a.mjs', 'shared-b.mjs', 'shared-c.mjs', 'whatsapp.mjs']);
 });
 
+test('retained English locale translates WhatsApp scan cancellation', async () => {
+  const locale = await read('src/channels/shared/i18n-en/whatsapp.mjs');
+  assert.match(locale, /'扫码接入已取消。': 'The QR code connection was cancelled\.'/);
+});
+
 test('retained client metadata names WhatsApp only', async () => {
   const [locale, styles] = await Promise.all([
     read('plugin-src/client/i18n.js'),
