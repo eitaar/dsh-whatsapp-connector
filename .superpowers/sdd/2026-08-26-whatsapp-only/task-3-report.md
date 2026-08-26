@@ -140,3 +140,31 @@ Complete. Added the retained English translation for `扫码接入已取消。` 
 
 - `lib/index.js` changed because the host bundle embeds the retained host-side locale dictionary; `lib/client.js` was rebuilt and remained byte-identical.
 - The SDD plan/ledger files and pre-existing untracked `docs/` content were not staged or modified.
+
+## Final fix round 2
+
+### Status
+
+Complete. Removed Slack/Discord/Telegram-specific artifact permission branches, added exact retained bundled license texts, and strengthened package verification for license coverage, executable channel markers, and published runtime artifacts.
+
+### Red/green verification
+
+- **RED:** `npm test -- --test-name-pattern='artifact permission|exact retained|package verifier'` — exit 1; 12 passed, 3 failed for the new assertions.
+- **GREEN:** same command — exit 0; 15 passed, 0 failed.
+
+### Verification
+
+- `npm run check` — exit 0; build succeeded, 15 tests passed, verifier printed `Verified dsh-im package artifacts.`.
+- `npm pack --dry-run` — exit 0; `@xmanrui/dsh-im@3.0.1`, 94 files, including all `licenses/*.txt` files and no `node_modules` or runtime state.
+- License/content scan — exit 0; exact installed Baileys, libsignal, protobufjs, sharp, qrcode, esbuild, React license texts copied; LGPL-3 text sourced from `/usr/share/common-licenses/LGPL-3` for the metadata-only sharp-libvips package.
+- `git diff --check` — exit 0.
+
+### Commit
+
+`21785fa` — `fix: add bundled license coverage and WhatsApp artifact checks`
+
+### Concerns
+
+- sharp-libvips publishes SPDX metadata but no license text file; the shipped LGPL text is the system's authoritative GNU license text.
+- The SDD plan/ledger files and pre-existing untracked `docs/` content remain unstaged.
+

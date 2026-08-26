@@ -51,6 +51,7 @@
     "bin",
     "cordis.patch.yml",
     "lib",
+    "licenses",
     "plugin-src",
     "scripts",
     "src",

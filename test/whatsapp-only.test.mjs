@@ -68,6 +68,36 @@ test('retained English locale translates WhatsApp scan cancellation', async () =
   assert.match(locale, /'扫码接入已取消。': 'The QR code connection was cancelled\.'/);
 });
 
+test('artifact permission messaging has no removed channel branches', async () => {
+  const source = await read('src/channels/shared/text-harness-bridge.mjs');
+  assert.match(source, /artifact-permission-required/);
+  for (const channel of ['slack', 'discord', 'telegram']) {
+    assert.doesNotMatch(source, new RegExp(`descriptor\\?\\.key\\s*===\\s*['"]${channel}['"]`));
+  }
+});
+
+test('package ships exact retained component licenses', async () => {
+  const manifest = JSON.parse(await read('package.json'));
+  assert.ok(manifest.files.includes('licenses'));
+  const licenseFiles = {
+    'baileys-MIT.txt': 'node_modules/@whiskeysockets/baileys/LICENSE',
+    'libsignal-GPL-3.0.txt': 'node_modules/libsignal/LICENSE',
+    'protobufjs-BSD-3-Clause.txt': 'node_modules/protobufjs/LICENSE',
+    'sharp-Apache-2.0.txt': 'node_modules/sharp/LICENSE',
+    'sharp-libvips-LGPL-3.0-or-later.txt': '/usr/share/common-licenses/LGPL-3',
+  };
+  for (const [name, sourcePath] of Object.entries(licenseFiles)) {
+    assert.equal(await read(`licenses/${name}`), await read(sourcePath), name);
+  }
+});
+
+test('package verifier checks retained licenses and runtime artifacts', async () => {
+  const source = await read('scripts/verify-package.mjs');
+  assert.match(source, /licenses\/baileys-MIT\.txt/);
+  assert.match(source, /node_modules|auth|credentials|runtime state/);
+  assert.match(source, /removed channel/);
+});
+
 test('retained client metadata names WhatsApp only', async () => {
   const [locale, styles] = await Promise.all([
     read('plugin-src/client/i18n.js'),

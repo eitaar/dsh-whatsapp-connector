@@ -25,6 +25,16 @@ const required = [
   'cordis.patch.yml',
   'README.md',
   'THIRD_PARTY_NOTICES.md',
+  'licenses/baileys-MIT.txt',
+  'licenses/libsignal-GPL-3.0.txt',
+  'licenses/protobufjs-BSD-3-Clause.txt',
+  'licenses/sharp-Apache-2.0.txt',
+  'licenses/sharp-libvips-LGPL-3.0-or-later.txt',
+  'licenses/qrcode-MIT.txt',
+  'licenses/esbuild-MIT.txt',
+  'licenses/react-MIT.txt',
+  'licenses/react-dom-MIT.txt',
+  'licenses/react-test-renderer-MIT.txt',
   'plugin-src/client/i18n.js',
   'plugin-src/client/channels/whatsapp/index.js',
   'plugin-src/client/channels/whatsapp/styles.js',
@@ -148,6 +158,25 @@ if (/@xmanrui\/dsh-(?:feishu|weixin|dingtalk)/.test(host)) {
 const removedImportPattern = /channels\/(?:dingtalk|discord|feishu|office|qq|slack|telegram|wecom|weixin)(?:\/|['"])/u;
 if (removedImportPattern.test(hostSources) || removedImportPattern.test(clientSources)) {
   throw new Error('source still imports a removed channel');
+}
+const removedExecutableMarkers = [
+  'applyDingtalk', 'applyDiscord', 'applyFeishu', 'applyOffice',
+  'applyQq', 'applySlack', 'applyTelegram', 'applyWecom', 'applyWeixin',
+  'DingtalkSettingsTab', 'DiscordSettingsTab', 'FeishuSettingsTab',
+  'OfficeSettingsTab', 'QqSettingsTab', 'SlackSettingsTab',
+  'TelegramSettingsTab', 'WecomSettingsTab', 'WeixinSettingsTab',
+];
+for (const marker of removedExecutableMarkers) {
+  if (hostSource.includes(marker) || clientEntrySource.includes(marker)
+    || host.includes(marker) || client.includes(marker)) {
+    throw new Error(`removed channel executable marker remains: ${marker}`);
+  }
+}
+const forbiddenRuntimeArtifactPattern = /(?:^|\/)(?:node_modules|auth|auth_info_baileys|credentials|runtime-state|runtime_state)(?:\/|$)/iu;
+for (const path of manifest.files ?? []) {
+  if (forbiddenRuntimeArtifactPattern.test(path)) {
+    throw new Error(`forbidden runtime artifact is published: ${path}`);
+  }
 }
 if (/@xmanrui\/dsh-(?:feishu|weixin|dingtalk)/.test(
   manifestText + lockText + hostSources + clientSources,

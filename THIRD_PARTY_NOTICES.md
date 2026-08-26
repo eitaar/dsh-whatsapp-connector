@@ -4,6 +4,8 @@ This project is an independent DeepSeek Harness integration and an MIT-licensed 
 
 ## Retained packages
 
+The exact upstream license texts for retained bundled components are shipped in [`licenses/`](licenses/), alongside this notice. Filenames identify the package and SPDX license.
+
 The retained direct packages are:
 
 - [`@whiskeysockets/baileys` 7.0.0-rc14](https://github.com/WhiskeySockets/Baileys) — MIT License; copyright (c) 2025 Rajeh Taher/WhiskeySockets.
