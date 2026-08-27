@@ -338,7 +338,10 @@ const EN = Object.freeze({
 
 export const en = EN;
 export const zh = Object.freeze(Object.fromEntries(
-  Object.keys(EN).map((key) => [key, key === '$locale' ? 'zh' : key]),
+  Object.keys(EN).map((key) => [
+    key,
+    key === '$locale' ? 'zh' : key === 'WhatsApp Connector' ? 'WhatsApp 连接器' : key,
+  ]),
 ));
 
 let translate = (key) => key;

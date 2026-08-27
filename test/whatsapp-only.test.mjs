@@ -156,18 +156,20 @@ test('retained client metadata names WhatsApp only', async () => {
 });
 
 test('settings navigation uses the WhatsApp Connector label', async () => {
-  const [client, locale, readme, englishReadme, cli] = await Promise.all([
+  const [client, locale, readme, englishReadme, cli, { zh }] = await Promise.all([
     read('plugin-src/client/index.js'),
     read('plugin-src/client/i18n.js'),
     read('README.md'),
     read('README.en.md'),
     read('bin/dsh-whatsapp-connector.mjs'),
+    import('../plugin-src/client/i18n.js'),
   ]);
   assert.match(client, /label: \(\) => t\('WhatsApp Connector'\)/);
   assert.match(locale, /'WhatsApp Connector': 'WhatsApp Connector'/);
-  assert.match(readme, /设置 → WhatsApp Connector/);
+  assert.equal(zh['WhatsApp Connector'], 'WhatsApp 连接器');
+  assert.match(readme, /设置 → WhatsApp 连接器/);
   assert.match(englishReadme, /Settings → WhatsApp Connector/);
-  assert.match(cli, /设置 → WhatsApp Connector/);
+  assert.match(cli, /设置 → WhatsApp 连接器/);
 });
 
 test('active package and DSH registration use dsh-whatsapp-connector', async () => {
@@ -249,7 +251,10 @@ test('install preserves a legacy directory and reports separate configuration gu
   await mkdir(fakeBin);
   await mkdir(legacyRoot, { recursive: true });
   await writeFile(marker, 'do-not-touch', 'utf8');
-  await writeFile(fakeDsh, `#!${process.execPath}\\nconst { appendFileSync } = require('node:fs');\\nappendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');\\n`);
+  await writeFile(fakeDsh, `#!${process.execPath}
+const { appendFileSync } = require('node:fs');
+appendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');
+`);
   await chmod(fakeDsh, 0o755);
   try {
     const result = spawnSync(process.execPath, [
@@ -290,6 +295,8 @@ test('install adds the connector without removing it', async () => {
     });
     assert.equal(result.status, 0, result.stderr);
     const commands = (await readFile(logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+    assert.equal(commands.filter((command) => command.includes('add')).length, 1);
+    assert.equal(commands.filter((command) => command.includes('remove')).length, 0);
     assert.deepEqual(commands, [[
       'plugin', '--profile', 'web', 'add', '--save-exact', resolve(new URL('../', import.meta.url).pathname),
     ]]);

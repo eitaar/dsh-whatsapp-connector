@@ -62,7 +62,7 @@ try {
     const dshHome = process.env.DSH_HOME ?? join(homedir(), '.dsh');
     const legacy = await hasLegacyData(dshHome);
     runDsh(['plugin', '--profile', profile, 'add', '--save-exact', source]);
-    console.log('\ndsh-whatsapp-connector 插件已安装。请重启 dsh web、刷新浏览器，然后打开「设置 → WhatsApp Connector」。');
+    console.log('\ndsh-whatsapp-connector 插件已安装。请重启 dsh web、刷新浏览器，然后打开「设置 → WhatsApp 连接器」。');
     if (legacy) console.log(legacyDataWarning());
   } else if (command === 'uninstall') {
     if (args.length > 0) throw new Error(`无法识别的参数：${args.join(' ')}`);

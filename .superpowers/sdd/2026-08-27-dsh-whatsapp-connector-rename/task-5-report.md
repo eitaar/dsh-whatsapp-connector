@@ -2,11 +2,11 @@
 
 Date: 2026-08-27
 Branch: `refactor/whatsapp-only`
-HEAD: `d3aa097 docs: make connector migration guidance actionable`
+HEAD: `4937df9 fix: finalize connector rename review findings`
 
 ## Status
 
-Verification completed without modifying tracked repository files. No commit, push, or PR operation was performed.
+Verification completed for the final rename review fixes. Commit `4937df9` was created; no push, live relay restart, or `/home/ubuntu/.dsh` modification was performed.
 
 ## Full verification gate
 
@@ -81,4 +81,43 @@ Final fix-round verification output:
 - `git diff --check`: exit 0; no output.
 - Final active-name audit: exit 0; no output in non-explicitly-allowed contexts.
 
-The final report update is documentation-only and was committed separately; no push, live relay restart, `/home/ubuntu/.dsh` modification, or runtime/auth state change was performed.
+The final report update is documentation-only; no push, live relay restart, `/home/ubuntu/.dsh` modification, or runtime/auth state change was performed.
+
+## Final fix round: whole-branch review findings
+
+Date: 2026-08-27
+
+Implemented in commit `4937df9 fix: finalize connector rename review findings`:
+
+- `scripts/verify-package.mjs` now requires the active Host runtime source to contain the exact `integrations', 'dsh-whatsapp-connector'` storage expression and rejects the exact legacy `integrations', 'dsh-whatsapp'` expression. A focused test asserts both checks and their exact path strings.
+- The visible settings navigation label is `WhatsApp Connector` in client registration, locale dictionaries, CLI success output, and both README installation instructions. Generic IM category wording remains only in generic accessibility/settings copy.
+- Installer regression coverage creates a legacy directory and sentinel, runs a fake `dsh` install, verifies the sentinel and directory remain unchanged, and verifies migration guidance requests separate configuration. Detection remains path-only.
+
+Exact verification results:
+
+- `node --test test/whatsapp-only.test.mjs`: exit 0; 25 passed, 0 failed.
+- `npm run check`: exit 0; 28 passed, 0 failed; verifier output `Verified dsh-whatsapp-connector package artifacts.`
+- `npm test`: exit 0; 28 passed, 0 failed.
+- `npm pack --dry-run`: exit 0; `dsh-whatsapp-connector-3.0.1.tgz`; 95 files; package name `dsh-whatsapp-connector`.
+- `node scripts/verify-package.mjs`: exit 0; output `Verified dsh-whatsapp-connector package artifacts.`
+- `git diff --check`: exit 0; no output.
+- Active-name audit: exit 0; no output using the explicitly allowed-context exclusions.
+
+## Final fix round: installer fixture and Chinese label review findings
+
+Date: 2026-08-27
+
+Addressed the two review findings after commit `4937df9`:
+
+- Installer regression fixtures now write executable fake `dsh` scripts with actual newline characters. The install assertion explicitly requires exactly one `plugin add` command and zero `plugin remove` commands.
+- Chinese locale maps `WhatsApp Connector` to `WhatsApp 连接器`; the Chinese README and CLI success guidance use the translated navigation label. English remains `WhatsApp Connector`.
+
+Exact verification results:
+
+- `node --test test/whatsapp-only.test.mjs`: exit 0; 25 passed, 0 failed.
+- `npm run check`: exit 0; rebuilt `lib/client.js` and `lib/index.js`; 28 passed, 0 failed; verifier output `Verified dsh-whatsapp-connector package artifacts.`
+- `npm test`: exit 0; 28 passed, 0 failed.
+- `npm pack --dry-run`: exit 0; `dsh-whatsapp-connector-3.0.1.tgz`; name `dsh-whatsapp-connector`; version `3.0.1`; 95 files.
+- `git diff --check`: exit 0; no output.
+
+No `/home/ubuntu/.dsh` modification, live relay restart, push, subagent dispatch, or runtime/auth state change was performed.
