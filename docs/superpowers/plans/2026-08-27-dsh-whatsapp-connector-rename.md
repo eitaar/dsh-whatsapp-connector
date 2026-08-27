@@ -61,6 +61,8 @@
 
 Append these assertions to `test/whatsapp-only.test.mjs`:
 
+Extend the existing `node:fs/promises` import with `access`, `mkdtemp`, `mkdir`, `readFile`, `rm`, and `writeFile`, then add the path imports:
+
 ```js
 import { access, mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -99,12 +101,11 @@ test('renamed CLI is published and inherited CLI is absent', async () => {
 
 - [ ] **Step 2: Write failing legacy-root test**
 
-Add the future module import and test:
+Add the test with a dynamic import so the rest of the red test file still runs before the new module exists:
 
 ```js
-import { hasLegacyData } from '../bin/migration.mjs';
-
 test('legacy data detection is path-only and non-destructive', async () => {
+  const { hasLegacyData } = await import('../bin/migration.mjs');
   const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-rename-'));
   const legacyRoot = join(dshHome, 'integrations', 'dsh-whatsapp');
   const marker = join(legacyRoot, 'state.json');
