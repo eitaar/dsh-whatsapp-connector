@@ -82,7 +82,7 @@ export function IMSettingsTab({
       h('span', { className: 'dim-githubAction' },
         h('a', {
           className: 'dim-githubLink',
-          href: 'https://github.com/xmanrui/dsh-whatsapp-connector',
+          href: 'https://github.com/eitaar/dsh-whatsapp-connector',
           target: '_blank',
           rel: 'noopener noreferrer',
           'aria-label': 'dsh-whatsapp-connector GitHub',

@@ -257,6 +257,17 @@ test('generated bundles contain the new identity only', async () => {
   assert.doesNotMatch(client, /dsh-im-settings|DSH_IM_CLIENT_ID/);
 });
 
+test('client branding links to the eitaar repository in source and bundle', async () => {
+  const [source, client] = await Promise.all([
+    read('plugin-src/client/index.js'),
+    read('lib/client.js'),
+  ]);
+  for (const content of [source, client]) {
+    assert.match(content, /https:\/\/github\.com\/eitaar\/dsh-whatsapp-connector/);
+    assert.doesNotMatch(content, /https:\/\/github\.com\/xmanrui\/dsh-whatsapp-connector/);
+  }
+});
+
 test('verifier covers CLI, runtime, lock root, and inherited markers', async () => {
   const verifier = await read('scripts/verify-package.mjs');
   const normalized = verifier.replaceAll('\\/', '/');
