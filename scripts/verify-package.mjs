@@ -77,6 +77,51 @@ const [
 const manifest = JSON.parse(manifestText);
 const lock = JSON.parse(lockText);
 
+if (manifest.name !== 'dsh-whatsapp-connector') {
+  throw new Error('package manifest must use the dsh-whatsapp-connector package name');
+}
+if (JSON.stringify(manifest.bin) !== JSON.stringify({
+  'dsh-whatsapp-connector': 'bin/dsh-whatsapp-connector.mjs',
+})) {
+  throw new Error('package manifest must publish only the dsh-whatsapp-connector executable');
+}
+if (!/\bid\s*:\s*(?:["']dsh-whatsapp-connector["']|dsh-whatsapp-connector)\b/u.test(patch)
+  || !/\bname\s*:\s*(?:["']dsh-whatsapp-connector["']|dsh-whatsapp-connector)\b/u.test(patch)) {
+  throw new Error('Cordis patch must activate dsh-whatsapp-connector with matching id and name');
+}
+if (!/window\.__ModuleLoader__\.load\(\{\s*id:\s*["']dsh-whatsapp-connector["']/u.test(client)) {
+  throw new Error('client bundle must use the dsh-whatsapp-connector loader identity');
+}
+if (!client.includes('dsh-whatsapp-connector-settings')
+  || !clientEntrySource.includes('dsh-whatsapp-connector-settings')) {
+  throw new Error('client bundle and source must use the dsh-whatsapp-connector settings identity');
+}
+
+const activeIdentityText = [
+  manifestText,
+  lockText,
+  patch,
+  hostSource,
+  clientEntrySource,
+  clientSources,
+  hostSources,
+  client,
+  host,
+].join('\n');
+const forbiddenInheritedIdentities = [
+  /@xmanrui\/dsh-im/u,
+  /xmanrui-dsh-im/u,
+  /dsh-im-host/u,
+  /dsh-im-settings/u,
+  /DSH_IM_CLIENT_ID/u,
+  /DSH_IM_LANGUAGE/u,
+];
+for (const marker of forbiddenInheritedIdentities) {
+  if (marker.test(activeIdentityText)) {
+    throw new Error(`active inherited identity remains: ${marker}`);
+  }
+}
+
 // DSH runtime packages use module-local Symbol keys, so a second physical copy breaks Host lookup.
 const forbiddenDshDependency = /^@deepseek-ai\/dsh-/;
 const dependencySections = [

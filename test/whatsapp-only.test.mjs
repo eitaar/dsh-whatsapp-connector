@@ -183,3 +183,20 @@ test('legacy data detection is path-only and non-destructive', async () => {
     await rm(dshHome, { recursive: true, force: true });
   }
 });
+
+test('generated bundles contain the new identity only', async () => {
+  const host = await read('lib/index.js');
+  const client = await read('lib/client.js');
+  assert.match(host, /dsh-whatsapp-connector/);
+  assert.match(client, /dsh-whatsapp-connector/);
+  assert.doesNotMatch(host, /xmanrui-dsh-im|@xmanrui\/dsh-im/);
+  assert.doesNotMatch(client, /xmanrui-dsh-im|@xmanrui\/dsh-im/);
+  assert.doesNotMatch(host, /dsh-im-host|dsh-im failed|DSH_IM_LANGUAGE/);
+  assert.doesNotMatch(client, /dsh-im-settings|DSH_IM_CLIENT_ID/);
+});
+
+test('verifier requires the renamed active identity', async () => {
+  const verifier = await read('scripts/verify-package.mjs');
+  assert.match(verifier, /dsh-whatsapp-connector/);
+  assert.doesNotMatch(verifier, /name: '@xmanrui\/dsh-im'/);
+});
