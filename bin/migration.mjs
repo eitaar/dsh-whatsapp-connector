@@ -8,6 +8,9 @@ export const LEGACY_ACTIVE_IDENTITY_MARKERS = Object.freeze([
   'dsh-im-settings',
   'DSH_IM_CLIENT_ID',
   'DSH_IM_LANGUAGE',
+  'dsh_im_return_file',
+  '<dsh_im_files>',
+  '</dsh_im_files>',
 ]);
 
 export function legacyDataRoot(dshHome) {

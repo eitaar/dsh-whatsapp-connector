@@ -316,6 +316,21 @@ test('generated bundles contain the new identity only', async () => {
   assert.doesNotMatch(client, /dsh-im-settings|DSH_IM_CLIENT_ID/);
 });
 
+test('host artifact protocol uses only the renamed artifact and inbound tags', async () => {
+  const sources = await Promise.all([
+    read('src/channels/shared/semantic/artifact.mjs'),
+    read('src/channels/shared/inbound-file.mjs'),
+    read('lib/index.js'),
+  ]);
+  assert.match(sources[0], /dsh_whatsapp_connector_return_file/);
+  assert.match(sources[2], /dsh_whatsapp_connector_return_file/);
+  assert.match(sources[1], /<dsh_whatsapp_connector_files>|<\/dsh_whatsapp_connector_files>/);
+  assert.match(sources[2], /<dsh_whatsapp_connector_files>|<\/dsh_whatsapp_connector_files>/);
+  for (const source of sources) {
+    assert.doesNotMatch(source, /dsh_im_return_file|<dsh_im_files>|<\/dsh_im_files>/);
+  }
+});
+
 test('client branding links to the eitaar repository in source and bundle', async () => {
   const [source, client] = await Promise.all([
     read('plugin-src/client/index.js'),
@@ -347,7 +362,8 @@ test('verifier uses centralized legacy markers and active sources have no old re
   assert.ok(Object.isFrozen(LEGACY_ACTIVE_IDENTITY_MARKERS));
   assert.deepEqual(LEGACY_ACTIVE_IDENTITY_MARKERS, [
     '@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'dsh-im-settings',
-    'DSH_IM_CLIENT_ID', 'DSH_IM_LANGUAGE',
+    'DSH_IM_CLIENT_ID', 'DSH_IM_LANGUAGE', 'dsh_im_return_file',
+    '<dsh_im_files>', '</dsh_im_files>',
   ]);
   assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
   assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);

@@ -4,7 +4,7 @@ import { copyFile, lstat, mkdtemp, open, realpath, unlink } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { basename, extname, isAbsolute, join, resolve } from 'node:path';
 
-export const OUTBOUND_ARTIFACT_TOOL = 'dsh_im_return_file';
+export const OUTBOUND_ARTIFACT_TOOL = 'dsh_whatsapp_connector_return_file';
 
 const ARTIFACT_KIND = 'dsh-whatsapp-connector-outbound-artifact';
 const ARTIFACT_READ_CHUNK_BYTES = 64 * 1024;
