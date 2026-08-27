@@ -4,7 +4,7 @@
 
 <p align="center">
   <img src="assets/logo-dsh-whatsapp-connector-connecting-readme-3x2.png" alt="连接 DeepSeek Harness" width="420" height="280">
-  <img src="assets/logo-plugin-phone.png" alt="DSH-IM 手机标志" width="280" height="280">
+  <img src="assets/logo-plugin-phone.png" alt="dsh-whatsapp-connector 手机标志" width="280" height="280">
 </p>
 
 ## WhatsApp 接入
@@ -27,7 +27,7 @@ npx -y github:eitaar/dsh-whatsapp-connector install
 node bin/dsh-whatsapp-connector.mjs install --source .
 ```
 
-插件、CLI 和包身份均为 `dsh-whatsapp-connector`，运行时存储根目录为 `~/.dsh/integrations/dsh-whatsapp-connector/`。如果检测到现有 `~/.dsh/integrations/dsh-whatsapp/`，只会提示迁移：不会自动复制、删除或覆盖其中任何内容。历史上游包 [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) 仅用于来源归属；不要将其作为本连接器的安装目标。
+插件、CLI 和包身份均为 `dsh-whatsapp-connector`，运行时存储根目录为 `~/.dsh/integrations/dsh-whatsapp-connector/`。请单独配置新的连接器；如果检测到现有 `~/.dsh/integrations/dsh-whatsapp/`，请自行选择保留、停用或移除旧安装。这里只会提示迁移：不会自动复制、删除或覆盖其中任何内容。历史上游包 [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) 仅用于来源归属；不要将其作为本连接器的安装目标。
 
 重启 `dsh web`、刷新浏览器，然后打开「设置 → IM机器人」并扫描 WhatsApp 二维码。升级会保留已有凭据、工作区、Agent Preset 和 Session 绑定。Secret 与关联设备状态只保存在本机受保护的凭据/运行时存储中，状态和机器人列表接口不会返回它们。
 

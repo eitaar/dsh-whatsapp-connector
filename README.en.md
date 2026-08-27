@@ -4,7 +4,7 @@ An MIT-licensed derivative of [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh
 
 <p align="center">
   <img src="assets/logo-dsh-whatsapp-connector-connecting-readme-3x2.png" alt="Connecting DeepSeek Harness" width="420" height="280">
-  <img src="assets/logo-plugin-phone.png" alt="DSH-IM phone logo" width="280" height="280">
+  <img src="assets/logo-plugin-phone.png" alt="dsh-whatsapp-connector phone logo" width="280" height="280">
 </p>
 
 ## WhatsApp
@@ -27,7 +27,7 @@ From a checkout:
 node bin/dsh-whatsapp-connector.mjs install --source .
 ```
 
-The package, CLI, and plugin identity is `dsh-whatsapp-connector`; its runtime storage root is `~/.dsh/integrations/dsh-whatsapp-connector/`. If an existing `~/.dsh/integrations/dsh-whatsapp/` directory is detected, the connector only reports it for migration: it never copies, deletes, or overwrites that directory automatically. The historical upstream package [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) is retained for attribution only and is not an install target for this connector.
+The package, CLI, and plugin identity is `dsh-whatsapp-connector`; its runtime storage root is `~/.dsh/integrations/dsh-whatsapp-connector/`. Configure the new connector separately. If an existing `~/.dsh/integrations/dsh-whatsapp/` directory is detected, choose whether to keep, disable, or remove the old installation. The connector only reports it for migration: it never copies, deletes, or overwrites that directory automatically. The historical upstream package [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) is retained for attribution only and is not an install target for this connector.
 
 Restart `dsh web`, refresh the browser, then open **Settings → IM Bot** and scan the WhatsApp QR code. Existing credentials, workspaces, Agent Presets, and Session bindings are preserved during upgrades. Secrets and linked-device state stay in the local protected credential/runtime stores and are never returned by status or bot-list responses.
 

@@ -37,15 +37,34 @@ test('documentation describes WhatsApp only', async () => {
 });
 
 test('documentation installs and names the new plugin', async () => {
-  for (const path of ['README.md', 'README.en.md']) {
+  const expectations = {
+    'README.md': {
+      separateConfiguration: /请单独配置新的连接器/,
+      legacyChoice: /保留、停用或移除旧安装/,
+      nonDestructive: /不会自动复制、删除或覆盖/,
+    },
+    'README.en.md': {
+      separateConfiguration: /configure the new connector separately/i,
+      legacyChoice: /choose whether to keep, disable, or remove the old installation/i,
+      nonDestructive: /never copies, deletes, or overwrites/i,
+    },
+  };
+
+  for (const [path, expected] of Object.entries(expectations)) {
     const source = await read(path);
     assert.match(source, /dsh-whatsapp-connector/);
-    assert.match(source, /github:eitaar\/dsh-whatsapp-connector/);
-    assert.doesNotMatch(source, /@xmanrui\/dsh-im install|dsh-im install/);
+    assert.match(source, /npx -y github:eitaar[/]dsh-whatsapp-connector install/);
+    assert.match(source, /node bin[/]dsh-whatsapp-connector\.mjs install --source \./);
+    assert.match(source, /~[/]\.dsh[/]integrations[/]dsh-whatsapp-connector[/]/);
+    assert.match(source, expected.nonDestructive);
+    assert.match(source, expected.separateConfiguration);
+    assert.match(source, expected.legacyChoice);
+    assert.doesNotMatch(source, /@xmanrui[/]dsh-im install|dsh-im install/);
+    assert.doesNotMatch(source, /alt=[\"'][^\"']*DSH-IM[^\"']*[\"']/i);
   }
   const notice = await read('NOTICE.md');
   assert.match(notice, /historical|upstream/i);
-  assert.match(notice, /@xmanrui\/dsh-im/);
+  assert.match(notice, /@xmanrui[/]dsh-im/);
 });
 
 test('bundle patch retains DSH compatibility identity', async () => {
