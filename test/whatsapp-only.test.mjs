@@ -195,8 +195,16 @@ test('generated bundles contain the new identity only', async () => {
   assert.doesNotMatch(client, /dsh-im-settings|DSH_IM_CLIENT_ID/);
 });
 
-test('verifier requires the renamed active identity', async () => {
+test('verifier covers CLI, runtime, lock root, and inherited markers', async () => {
   const verifier = await read('scripts/verify-package.mjs');
-  assert.match(verifier, /dsh-whatsapp-connector/);
+  const normalized = verifier.replaceAll('\\/', '/');
+  assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
+  assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);
+  assert.match(verifier, /lock\.packages\?\.\[''\]\?\.name/);
+  assert.match(verifier, /const forbiddenInheritedIdentities = \[/);
+  for (const marker of [
+    '@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'dsh-im-settings',
+    'DSH_IM_CLIENT_ID', 'DSH_IM_LANGUAGE',
+  ]) assert.ok(normalized.includes(marker), `forbidden marker is covered: ${marker}`);
   assert.doesNotMatch(verifier, /name: '@xmanrui\/dsh-im'/);
 });

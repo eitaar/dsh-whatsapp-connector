@@ -61,6 +61,8 @@ const [
   clientEntrySource,
   clientSources,
   hostSources,
+  cli,
+  runtimeSources,
   executable,
 ] = await Promise.all([
   readFile(resolve(root, 'lib/client.js'), 'utf8'),
@@ -72,6 +74,8 @@ const [
   readFile(resolve(root, 'plugin-src/client/index.js'), 'utf8'),
   readSourceTree(resolve(root, 'plugin-src/client')),
   readSourceTree(resolve(root, 'plugin-src/host')),
+  readFile(resolve(root, 'bin/dsh-whatsapp-connector.mjs'), 'utf8'),
+  readSourceTree(resolve(root, 'src')),
   stat(resolve(root, 'bin/dsh-whatsapp-connector.mjs')),
 ]);
 const manifest = JSON.parse(manifestText);
@@ -79,6 +83,9 @@ const lock = JSON.parse(lockText);
 
 if (manifest.name !== 'dsh-whatsapp-connector') {
   throw new Error('package manifest must use the dsh-whatsapp-connector package name');
+}
+if (lock.name !== 'dsh-whatsapp-connector' || lock.packages?.['']?.name !== 'dsh-whatsapp-connector') {
+  throw new Error('package lock must use the dsh-whatsapp-connector package name at the root');
 }
 if (JSON.stringify(manifest.bin) !== JSON.stringify({
   'dsh-whatsapp-connector': 'bin/dsh-whatsapp-connector.mjs',
@@ -105,6 +112,8 @@ const activeIdentityText = [
   clientEntrySource,
   clientSources,
   hostSources,
+  cli,
+  runtimeSources,
   client,
   host,
 ].join('\n');
