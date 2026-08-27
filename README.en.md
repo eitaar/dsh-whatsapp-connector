@@ -3,7 +3,7 @@
 An MIT-licensed derivative of [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im), maintained by `eitaar`. This connector brings WhatsApp Web messaging to DeepSeek Harness with native message editing for five-second streaming progress updates. Upstream attribution and third-party notices remain in [`LICENSE`](LICENSE), [`NOTICE.md`](NOTICE.md), and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
 
 <p align="center">
-  <img src="assets/logo-dsh-im-connecting-readme-3x2.png" alt="Connecting DeepSeek Harness" width="420" height="280">
+  <img src="assets/logo-dsh-whatsapp-connector-connecting-readme-3x2.png" alt="Connecting DeepSeek Harness" width="420" height="280">
   <img src="assets/logo-plugin-phone.png" alt="DSH-IM phone logo" width="280" height="280">
 </p>
 
@@ -11,14 +11,14 @@ An MIT-licensed derivative of [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh
 
 Link a device by scanning the QR code with mobile WhatsApp. The connector uses WhatsApp Web through Baileys, shows read receipts and typing state, and edits one progress message every **5,000 ms** while Harness generates the answer. The default access policy is **Only me** (the linked account's self-chat). **Selected contacts** accepts allowlisted direct-message phone numbers, and **Open responses** accepts direct messages plus permitted group messages, mentions, and replies. Rejected messages are ignored silently.
 
-The bot also supports Harness sessions, workspaces, Agent Presets, model and reasoning controls, batch input, interactive questions, approvals, file return, and the standard `/help`, `/new`, `/status`, `/version`, `/models`, `/model`, `/reasoning`, `/preset`, `/stop`, `/steer`, `/batch`, `/send`, `/cancel`, `/compact`, `/workspace`, `/workspacelist`, `/sessionlist`, and `/session` commands. Bot messages are Chinese by default; set `language: en` or `DSH_IM_LANGUAGE=en` for English, including the `Processing…` streaming status.
+The bot also supports Harness sessions, workspaces, Agent Presets, model and reasoning controls, batch input, interactive questions, approvals, file return, and the standard `/help`, `/new`, `/status`, `/version`, `/models`, `/model`, `/reasoning`, `/preset`, `/stop`, `/steer`, `/batch`, `/send`, `/cancel`, `/compact`, `/workspace`, `/workspacelist`, `/sessionlist`, and `/session` commands. Bot messages are Chinese by default; set `language: en` or `DSH_WHATSAPP_CONNECTOR_LANGUAGE=en` for English, including the `Processing…` streaming status.
 
 ## Installation
 
 Install the published package:
 
 ```sh
-dsh plugin --profile web add -w @xmanrui/dsh-im
+dsh plugin --profile web add -w dsh-whatsapp-connector
 ```
 
 Or try the latest GitHub snapshot:
@@ -34,10 +34,10 @@ Restart `dsh web`, refresh the browser, then open **Settings → IM Bot** and sc
 ```sh
 npm install
 npm run check
-node bin/dsh-im.mjs install --source .
+node bin/dsh-whatsapp-connector.mjs install --source .
 ```
 
-`npm run check` runs the tests, builds the Host and Client artifacts, and verifies the publishable package. The package identity remains `@xmanrui/dsh-im`; its Cordis patch retains the `xmanrui-dsh-im` integration identity.
+`npm run check` runs the tests, builds the Host and Client artifacts, and verifies the publishable package. The package identity is `dsh-whatsapp-connector`; its Cordis patch uses the `dsh-whatsapp-connector` integration identity.
 
 ## Licensing
 
