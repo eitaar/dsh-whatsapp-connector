@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { t } from './i18n.mjs';
 
-const FILES_DIRECTORY = join('.dsh-im', 'inbound');
+const FILES_DIRECTORY = join('.dsh-whatsapp-connector', 'inbound');
 
 export class InboundFileError extends Error {
   constructor(code, message, userMessage = t('文件接收失败，请重新发送后再试。'), options = {}) {

@@ -598,7 +598,7 @@ export class HarnessClient {
     createWebSocket = (url) => new WebSocket(url),
     interactionReconnectDelayMs = 500,
     rpcIdPrefix = 'im',
-    logPrefix = 'dsh-im',
+    logPrefix = 'dsh-whatsapp-connector',
     commandExecutor,
     controlExecutor,
     sessionMaintenanceExecutor,

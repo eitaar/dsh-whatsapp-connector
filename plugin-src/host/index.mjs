@@ -2,7 +2,7 @@ import { apply as applyWhatsapp } from './channels/whatsapp/index.mjs';
 import { installOutboundArtifactTool } from '../../src/channels/shared/semantic/artifact.mjs';
 import { setImHostLanguage } from '../../src/channels/shared/i18n.mjs';
 
-export const name = 'dsh-im-host';
+export const name = 'dsh-whatsapp-connector-host';
 export const inject = [
   'connection',
   'credentials',
@@ -24,7 +24,7 @@ export function createImHostPlugin(internals = {}) {
     name,
     inject,
     async apply(ctx, config = {}) {
-      setImHostLanguage(config.language ?? process.env.DSH_IM_LANGUAGE);
+      setImHostLanguage(config.language ?? process.env.DSH_WHATSAPP_CONNECTOR_LANGUAGE);
       if (typeof ctx?.inject === 'function') {
         ctx.inject(['tools', 'systemPrompt'], (artifactCtx) => {
           installOutboundArtifactTool(artifactCtx);
@@ -41,11 +41,11 @@ export function createImHostPlugin(internals = {}) {
           await start(ctx, channelConfig(config, channel));
         } catch (error) {
           failures.push(error);
-          logger.error?.(`[dsh-im] failed to activate ${channel}; continuing with the remaining channels`, error);
+          logger.error?.(`[dsh-whatsapp-connector] failed to activate ${channel}`, error);
         }
       }
       if (failures.length === channels.length) {
-        throw new AggregateError(failures, 'dsh-im failed to activate every channel');
+        throw new AggregateError(failures, 'dsh-whatsapp-connector failed to activate every channel');
       }
     },
   });

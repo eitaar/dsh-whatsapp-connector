@@ -153,7 +153,7 @@ export async function createWhatsappWebSession({
         await saveCreds();
         await hardenAuthDirectory(authDir);
       });
-      saveQueue.catch(() => logger.error?.('[dsh-im:whatsapp] failed to persist linked-device state'));
+      saveQueue.catch(() => logger.error?.('[dsh-whatsapp-connector:whatsapp] failed to persist linked-device state'));
       resolveWhenLinked();
     });
     nextSocket.ev.on('connection.update', (update) => {
@@ -193,7 +193,7 @@ export async function createWhatsappWebSession({
           if (timestamp === null || timestamp < sessionStartedAt - APPEND_RECENT_GRACE_MS) continue;
         }
         Promise.resolve(onMessage(message, { socket: nextSocket })).catch(() => {
-          logger.error?.('[dsh-im:whatsapp] failed to process an inbound WhatsApp message');
+          logger.error?.('[dsh-whatsapp-connector:whatsapp] failed to process an inbound WhatsApp message');
         });
       }
     });

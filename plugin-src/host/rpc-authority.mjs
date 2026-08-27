@@ -7,5 +7,5 @@ const RPC_AUTHORITIES = new Set(['loopback', 'trusted-host']);
 export function resolveRpcAuthority(value) {
   if (value === undefined) return 'loopback';
   if (RPC_AUTHORITIES.has(value)) return value;
-  throw new TypeError('dsh-im rpcAuthority must be "loopback" or "trusted-host"');
+  throw new TypeError('dsh-whatsapp-connector rpcAuthority must be "loopback" or "trusted-host"');
 }

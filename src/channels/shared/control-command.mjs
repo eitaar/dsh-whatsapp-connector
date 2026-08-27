@@ -50,7 +50,7 @@ export async function runControlCommand(text, harness, state, key, {
 
   if (version) {
     return /^\/version$/iu.test(command)
-      ? commandResult(`dsh-im v${manifest.version}`)
+      ? commandResult(`dsh-whatsapp-connector v${manifest.version}`)
       : commandResult(t(VERSION_USAGE));
   }
 

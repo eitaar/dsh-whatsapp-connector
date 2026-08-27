@@ -374,7 +374,7 @@ export class TextHarnessBridge {
       this.#status.lastError = error?.message ?? String(error);
       const failure = setLastMessageFailure(this.#status, error);
       this.#logger.error?.(
-        `[dsh-im:${this.#descriptor.key}] failed to process a batch input message [${failure.referenceId}]:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to process a batch input message [${failure.referenceId}]:`,
         error,
       );
     }).finally(() => {
@@ -463,7 +463,7 @@ export class TextHarnessBridge {
       this.#status.lastError = error?.message ?? String(error);
       const failure = setLastMessageFailure(this.#status, error);
       this.#logger.error?.(
-        `[dsh-im:${this.#descriptor.key}] failed to process a command [${failure.referenceId}]:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to process a command [${failure.referenceId}]:`,
         error,
       );
       await this.#bot.sendText(target, messageFailureText(failure)).catch(() => undefined);
@@ -610,7 +610,7 @@ export class TextHarnessBridge {
       }
 
       await this.#bot.sendTyping?.(target).catch((error) => {
-        this.#logger.warn?.(`[dsh-im:${this.#descriptor.key}] typing indicator failed:`, error);
+        this.#logger.warn?.(`[dsh-whatsapp-connector:${this.#descriptor.key}] typing indicator failed:`, error);
       });
       let streamFinished = false;
       if (typeof this.#bot.openDeliveryStream === 'function') {
@@ -619,7 +619,7 @@ export class TextHarnessBridge {
           semanticStream = true;
         } catch (error) {
           this.#logger.warn?.(
-            `[dsh-im:${this.#descriptor.key}] unable to start a semantic reply stream; using final delivery:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] unable to start a semantic reply stream; using final delivery:`,
             error,
           );
         }
@@ -628,7 +628,7 @@ export class TextHarnessBridge {
           stream = await this.#bot.openStream({ ...target, senderId: message.senderId });
         } catch (error) {
           this.#logger.warn?.(
-            `[dsh-im:${this.#descriptor.key}] unable to start a streamed reply; using text:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] unable to start a streamed reply; using text:`,
             error,
           );
         }
@@ -699,7 +699,7 @@ export class TextHarnessBridge {
         } catch (error) {
           stream.cancel?.();
           this.#logger.warn?.(
-            `[dsh-im:${this.#descriptor.key}] streamed reply finalization failed; using text:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] streamed reply finalization failed; using text:`,
             error,
           );
         }
@@ -791,7 +791,7 @@ export class TextHarnessBridge {
             : result !== false && result?.deliveryOutcome !== 'failed';
         } catch (streamError) {
           this.#logger.warn?.(
-            `[dsh-im:${this.#descriptor.key}] unable to finalize the failed stream:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] unable to finalize the failed stream:`,
             streamError,
           );
           return false;
@@ -807,7 +807,7 @@ export class TextHarnessBridge {
         ? `${messageFailureText(failure)}\n\n${failedBatch.message}`
         : messageFailureText(failure);
       this.#logger.error?.(
-        `[dsh-im:${this.#descriptor.key}] failed to process a message [${failure.referenceId}]:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to process a message [${failure.referenceId}]:`,
         error,
       );
       if (await presentStreamFailure(failureText)) {
@@ -818,7 +818,7 @@ export class TextHarnessBridge {
         await this.#bot.sendText(target, failureText);
       } catch (sendError) {
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to send the safe error reply:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send the safe error reply:`,
           sendError,
         );
       }
@@ -864,7 +864,7 @@ export class TextHarnessBridge {
         await this.#bot.sendText(target, t('请用文字回答当前问题。'));
       } catch (error) {
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to reject a non-text interaction reply:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to reject a non-text interaction reply:`,
           error,
         );
       }
@@ -892,7 +892,7 @@ export class TextHarnessBridge {
         message.statusReaction?.error();
         this.#status.lastError = t('{label}交互问题发送失败。', { label: this.#descriptor.label });
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to retry an interaction question:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to retry an interaction question:`,
           error,
         );
         pending.interaction.reconnect?.();
@@ -931,7 +931,7 @@ export class TextHarnessBridge {
         message.statusReaction?.error();
         this.#status.lastError = t('{label}交互问题发送失败。', { label: this.#descriptor.label });
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to send the next interaction question:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send the next interaction question:`,
           error,
         );
         pending.interaction.reconnect?.();
@@ -961,7 +961,7 @@ export class TextHarnessBridge {
           await this.#bot.sendText(target, t(INTERACTION_RESOLVED_TEXT));
         } catch (sendError) {
           this.#logger.error?.(
-            `[dsh-im:${this.#descriptor.key}] failed to send an expired interaction notice:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send an expired interaction notice:`,
             sendError,
           );
         }
@@ -981,14 +981,14 @@ export class TextHarnessBridge {
       pending.index -= 1;
       this.#status.lastError = t('回答提交失败。');
       this.#logger.error?.(
-        `[dsh-im:${this.#descriptor.key}] failed to answer a Harness interaction:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to answer a Harness interaction:`,
         error,
       );
       try {
         await this.#bot.sendText(target, t('回答提交失败，请重新发送当前问题的答案。'));
       } catch (sendError) {
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to send an interaction retry notice:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send an interaction retry notice:`,
           sendError,
         );
       }
@@ -1019,7 +1019,7 @@ export class TextHarnessBridge {
       || questions.length === 0
       || questions.some((question) => !validHarnessQuestion(question))) {
       this.#logger.warn?.(
-        `[dsh-im:${this.#descriptor.key}] ignored an invalid Harness question interaction`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] ignored an invalid Harness question interaction`,
       );
       return;
     }
@@ -1036,7 +1036,7 @@ export class TextHarnessBridge {
         );
       } catch (error) {
         this.#logger.error?.(
-          `[dsh-im:${this.#descriptor.key}] failed to send an interaction recovery notice:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send an interaction recovery notice:`,
           error,
         );
       }
@@ -1052,7 +1052,7 @@ export class TextHarnessBridge {
     if (this.#interactionKeys.has(interactionId)) return;
     if (existing) {
       this.#logger.warn?.(
-        `[dsh-im:${this.#descriptor.key}] cancelled a second pending Harness question`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] cancelled a second pending Harness question`,
       );
       await this.#respondCancellation(
         interaction,
@@ -1136,7 +1136,7 @@ export class TextHarnessBridge {
       await this.#bot.sendText(message.replyTarget, t(INTERACTION_RESOLVED_TEXT));
     } catch (error) {
       this.#logger.error?.(
-        `[dsh-im:${this.#descriptor.key}] failed to send an expired interaction notice:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to send an expired interaction notice:`,
         error,
       );
     }
@@ -1176,7 +1176,7 @@ export class TextHarnessBridge {
       );
     } catch (error) {
       this.#logger.warn?.(
-        `[dsh-im:${this.#descriptor.key}] failed to cancel a pending Harness interaction:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] failed to cancel a pending Harness interaction:`,
         error,
       );
     }

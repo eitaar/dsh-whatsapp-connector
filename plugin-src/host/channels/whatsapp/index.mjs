@@ -1,7 +1,7 @@
 import { createProductionController } from './production.mjs';
 import { installWhatsappRpc } from './rpc.mjs';
 
-export const name = 'dsh-im-whatsapp-host';
+export const name = 'dsh-whatsapp-connector-whatsapp-host';
 export const inject = ['connection', 'webServer', 'typertGateway'];
 
 export async function apply(ctx, config = {}) {
@@ -15,7 +15,7 @@ export async function apply(ctx, config = {}) {
     config.rpcOptions,
     config.rpcAuthority,
   );
-  ctx.effect(() => async () => production.close(), 'dsh-im: close WhatsApp Web connections');
+  ctx.effect(() => async () => production.close(), 'dsh-whatsapp-connector: close WhatsApp Web connections');
   return disposeRpc;
 }
 

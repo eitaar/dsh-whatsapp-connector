@@ -88,7 +88,7 @@ export class WhatsappController {
               ? t('WhatsApp 关联设备已失效，请移除后重新扫码。')
               : t('WhatsApp 连接未就绪，插件会自动重试。'),
           ));
-          this.#logger.warn?.(`[dsh-im:whatsapp] bot ${config.botId} failed to initialize`);
+          this.#logger.warn?.(`[dsh-whatsapp-connector:whatsapp] bot ${config.botId} failed to initialize`);
         } finally {
           this.#touch();
         }
@@ -344,7 +344,7 @@ export class WhatsappController {
         this.#errors.delete(botId);
       } catch (error) {
         this.#errors.set(botId, safeError('connection-failed', t('WhatsApp 已绑定，消息连接暂未就绪。')));
-        this.#logger.warn?.(`[dsh-im:whatsapp] bot ${botId} did not reconnect after QR binding`);
+        this.#logger.warn?.(`[dsh-whatsapp-connector:whatsapp] bot ${botId} did not reconnect after QR binding`);
       }
       if (previous?.authDirectory && previous.authDirectory !== config.authDirectory) {
         await this.#deleteAuth(previous.authDirectory).catch(() => undefined);
@@ -359,7 +359,7 @@ export class WhatsappController {
           const removed = await this.#configStore.remove(botId).catch(() => null);
           if (removed) {
             await this.#deleteState({ botId, config }).catch((cleanupError) => {
-              this.#logger.warn?.('[dsh-im:whatsapp] cancelled bot state cleanup failed:', cleanupError);
+              this.#logger.warn?.('[dsh-whatsapp-connector:whatsapp] cancelled bot state cleanup failed:', cleanupError);
             });
           }
         }
@@ -371,7 +371,7 @@ export class WhatsappController {
         await this.#deleteAuth(record.authDirectory).catch(() => undefined);
         record.state = 'failed';
         record.error = safeError('activation-failed', t('WhatsApp 已扫码，但无法保存关联设备。'));
-        this.#logger.error?.('[dsh-im:whatsapp] unable to persist linked-device session');
+        this.#logger.error?.('[dsh-whatsapp-connector:whatsapp] unable to persist linked-device session');
       }
     } finally {
       if (this.#activeAttemptId === record.id) this.#activeAttemptId = null;

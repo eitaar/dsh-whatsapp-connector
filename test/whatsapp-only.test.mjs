@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir, readFile } from 'node:fs/promises';
+import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -36,7 +38,7 @@ test('documentation describes WhatsApp only', async () => {
 
 test('bundle patch retains DSH compatibility identity', async () => {
   const patch = await read('cordis.patch.yml');
-  assert.match(patch, /name: '@xmanrui\/dsh-im'/);
+  assert.match(patch, /name: dsh-whatsapp-connector/);
 });
 
 test('third-party notices identify retained packages and copyleft assets', async () => {
@@ -110,5 +112,74 @@ test('retained client metadata names WhatsApp only', async () => {
   ]) assert.doesNotMatch(locale, new RegExp(stale), `locale contains ${stale}`);
   for (const selector of ['dim-logoWeixin', 'dim-logoFeishu', 'dim-logoDingtalk', 'dim-logoQq', 'dim-logoWecom', 'dim-logoTelegram', 'dim-logoOffice', 'dim-logoDiscord', 'dim-logoSlack']) {
     assert.doesNotMatch(styles, new RegExp(`\\.${selector}\\\\b`), `styles contain ${selector}`);
+  }
+});
+
+test('active package and DSH registration use dsh-whatsapp-connector', async () => {
+  const packageManifest = JSON.parse(await read('package.json'));
+  assert.equal(packageManifest.name, 'dsh-whatsapp-connector');
+  assert.deepEqual(packageManifest.bin, { 'dsh-whatsapp-connector': 'bin/dsh-whatsapp-connector.mjs' });
+  assert.equal(packageManifest.exports['./package.json'], './package.json');
+
+  const lock = JSON.parse(await read('package-lock.json'));
+  assert.equal(lock.name, 'dsh-whatsapp-connector');
+  assert.equal(lock.packages[''].name, 'dsh-whatsapp-connector');
+  assert.match(await read('cordis.patch.yml'), /id: dsh-whatsapp-connector/);
+  assert.match(await read('cordis.patch.yml'), /name: dsh-whatsapp-connector/);
+  assert.match(await read('plugin-src/client/build.mjs'), /'dsh-whatsapp-connector'/);
+  assert.match(await read('plugin-src/client/index.js'), /id: 'dsh-whatsapp-connector'/);
+  assert.match(await read('plugin-src/host/index.mjs'), /export const name = 'dsh-whatsapp-connector-host'/);
+
+  const activeSources = await Promise.all([
+    read('package.json'),
+    read('package-lock.json'),
+    read('cordis.patch.yml'),
+    read('plugin-src/client/build.mjs'),
+    read('plugin-src/client/index.js'),
+    read('plugin-src/host/index.mjs'),
+  ]);
+  for (const source of activeSources) {
+    for (const marker of ['@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'DSH_IM_']) {
+      assert.doesNotMatch(source, new RegExp(marker), marker);
+    }
+  }
+});
+
+test('active runtime paths use the new integration namespace', async () => {
+  const productionSources = await Promise.all([
+    read('plugin-src/host/channels/whatsapp/production.mjs'),
+    read('plugin-src/host/channels/shared/production.mjs'),
+  ]);
+  assert.match(productionSources[0], /integrations', 'dsh-whatsapp-connector'/);
+  assert.doesNotMatch(productionSources[0], /integrations', 'dsh-whatsapp'/);
+  assert.doesNotMatch(productionSources[1], /integrations', 'dsh-whatsapp'/);
+
+  const { pluginPaths } = await import('../plugin-src/host/channels/shared/production.mjs');
+  const paths = pluginPaths({ dshHome: '/tmp/dsh-whatsapp-connector-test' }, 'whatsapp');
+  assert.match(paths.config, /integrations\/dsh-whatsapp-connector\/config\.json$/);
+});
+
+test('renamed CLI is published and inherited CLI is absent', async () => {
+  await access(new URL('../bin/dsh-whatsapp-connector.mjs', import.meta.url));
+  await assert.rejects(
+    access(new URL('../bin/dsh-im.mjs', import.meta.url)),
+    { code: 'ENOENT' },
+  );
+});
+
+test('legacy data detection is path-only and non-destructive', async () => {
+  const { hasLegacyData } = await import('../bin/migration.mjs');
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-rename-'));
+  const legacyRoot = join(dshHome, 'integrations', 'dsh-whatsapp');
+  const marker = join(legacyRoot, 'state.json');
+  try {
+    assert.equal(await hasLegacyData(dshHome), false);
+    await mkdir(legacyRoot, { recursive: true });
+    assert.equal(await hasLegacyData(dshHome), true);
+    await writeFile(marker, 'sentinel', 'utf8');
+    assert.equal(await hasLegacyData(dshHome), true);
+    assert.equal(await readFile(marker, 'utf8'), 'sentinel');
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
   }
 });

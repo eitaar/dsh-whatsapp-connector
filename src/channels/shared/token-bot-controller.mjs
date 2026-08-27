@@ -89,7 +89,7 @@ export class TokenBotController {
             }),
           ));
           this.#logger.warn?.(
-            `[dsh-im:${this.#descriptor.key}] bot ${config.botId} failed to initialize:`,
+            `[dsh-whatsapp-connector:${this.#descriptor.key}] bot ${config.botId} failed to initialize:`,
             error,
           );
         } finally {
@@ -140,7 +140,7 @@ export class TokenBotController {
           }),
         ));
         this.#logger.warn?.(
-          `[dsh-im:${this.#descriptor.key}] bot ${identity.botId} credential connection failed:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] bot ${identity.botId} credential connection failed:`,
           error,
         );
       }
@@ -245,7 +245,7 @@ export class TokenBotController {
       }
       await this.#deleteState({ botId, config }).catch((error) => {
         this.#logger.warn?.(
-          `[dsh-im:${this.#descriptor.key}] bot ${botId} state cleanup failed:`,
+          `[dsh-whatsapp-connector:${this.#descriptor.key}] bot ${botId} state cleanup failed:`,
           error,
         );
       });
@@ -338,7 +338,7 @@ export class TokenBotController {
     this.#runtimes.delete(botId);
     await runtime?.stop().catch((error) => {
       this.#logger.warn?.(
-        `[dsh-im:${this.#descriptor.key}] bot ${botId} failed to stop cleanly:`,
+        `[dsh-whatsapp-connector:${this.#descriptor.key}] bot ${botId} failed to stop cleanly:`,
         error,
       );
     });

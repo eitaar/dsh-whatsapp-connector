@@ -15,7 +15,7 @@ function agentsFromContext(ctx) {
   }
   if (agents === undefined || agents === null) return undefined;
   if (typeof agents.get !== 'function') {
-    throw new TypeError('dsh-im requires a callable AgentRegistry when ctx.get("agents") is present');
+    throw new TypeError('dsh-whatsapp-connector requires a callable AgentRegistry when ctx.get("agents") is present');
   }
   return agents;
 }

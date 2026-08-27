@@ -1,6 +1,6 @@
 import * as React from 'react';
 
-export const IM_LOCALE_NAMESPACE = 'dsh-im';
+export const IM_LOCALE_NAMESPACE = 'dsh-whatsapp-connector';
 
 const EN = Object.freeze({
   '$locale': 'en',

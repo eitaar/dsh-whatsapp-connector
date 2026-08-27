@@ -1,4 +1,4 @@
-// Host-side i18n for dsh-im. Mirrors the conventions of the settings-UI
+// Host-side i18n for dsh-whatsapp-connector. Mirrors the conventions of the settings-UI
 // translator in plugin-src/client/i18n.js: dictionary keys are the exact
 // Chinese source literals, and Chinese (zh) is the identity default, so
 // untranslated or unrecognized text always falls back to the original
