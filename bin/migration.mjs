@@ -1,6 +1,15 @@
 import { access } from 'node:fs/promises';
 import { join } from 'node:path';
 
+export const LEGACY_ACTIVE_IDENTITY_MARKERS = Object.freeze([
+  '@xmanrui/dsh-im',
+  'xmanrui-dsh-im',
+  'dsh-im-host',
+  'dsh-im-settings',
+  'DSH_IM_CLIENT_ID',
+  'DSH_IM_LANGUAGE',
+]);
+
 export function legacyDataRoot(dshHome) {
   return join(dshHome, 'integrations', 'dsh-whatsapp');
 }

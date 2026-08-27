@@ -1,6 +1,7 @@
 import { access, readFile, readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
+import { LEGACY_ACTIVE_IDENTITY_MARKERS } from '../bin/migration.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 
@@ -117,16 +118,8 @@ const activeIdentityText = [
   client,
   host,
 ].join('\n');
-const forbiddenInheritedIdentities = [
-  /@xmanrui\/dsh-im/u,
-  /xmanrui-dsh-im/u,
-  /dsh-im-host/u,
-  /dsh-im-settings/u,
-  /DSH_IM_CLIENT_ID/u,
-  /DSH_IM_LANGUAGE/u,
-];
-for (const marker of forbiddenInheritedIdentities) {
-  if (marker.test(activeIdentityText)) {
+for (const marker of LEGACY_ACTIVE_IDENTITY_MARKERS) {
+  if (activeIdentityText.includes(marker)) {
     throw new Error(`active inherited identity remains: ${marker}`);
   }
 }

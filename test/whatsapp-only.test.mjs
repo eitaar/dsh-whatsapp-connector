@@ -232,10 +232,34 @@ test('verifier covers CLI, runtime, lock root, and inherited markers', async () 
   assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
   assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);
   assert.match(verifier, /lock\.packages\?\.\[''\]\?\.name/);
-  assert.match(verifier, /const forbiddenInheritedIdentities = \[/);
-  for (const marker of [
+  assert.match(verifier, /LEGACY_ACTIVE_IDENTITY_MARKERS/);
+  assert.match(verifier, /activeIdentityText\.includes\(marker\)/);
+  assert.doesNotMatch(verifier, /name: '@xmanrui\/dsh-im'/);
+});
+
+test('verifier uses centralized legacy markers and active sources have no old registration', async () => {
+  const verifier = await read('scripts/verify-package.mjs');
+  const normalized = verifier.replaceAll('\\/', '/');
+  const { LEGACY_ACTIVE_IDENTITY_MARKERS } = await import('../bin/migration.mjs');
+  assert.match(verifier, /LEGACY_ACTIVE_IDENTITY_MARKERS/);
+  assert.match(verifier, /from ['\"]\.\.\/bin\/migration\.mjs['\"]/);
+  assert.ok(Object.isFrozen(LEGACY_ACTIVE_IDENTITY_MARKERS));
+  assert.deepEqual(LEGACY_ACTIVE_IDENTITY_MARKERS, [
     '@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'dsh-im-settings',
     'DSH_IM_CLIENT_ID', 'DSH_IM_LANGUAGE',
-  ]) assert.ok(normalized.includes(marker), `forbidden marker is covered: ${marker}`);
-  assert.doesNotMatch(verifier, /name: '@xmanrui\/dsh-im'/);
+  ]);
+  assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
+  assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);
+  assert.match(verifier, /lock\.packages\?\.\[''\]\?\.name/);
+  assert.ok(normalized.includes('LEGACY_ACTIVE_IDENTITY_MARKERS'));
+  const activeSources = await Promise.all([
+    read('package.json'), read('package-lock.json'), read('cordis.patch.yml'),
+    read('bin/dsh-whatsapp-connector.mjs'), read('plugin-src/client/index.js'),
+    read('plugin-src/host/index.mjs'), read('lib/client.js'), read('lib/index.js'),
+  ]);
+  for (const source of activeSources) {
+    for (const marker of LEGACY_ACTIVE_IDENTITY_MARKERS) {
+      assert.doesNotMatch(source, new RegExp(marker), marker);
+    }
+  }
 });
