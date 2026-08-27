@@ -1,8 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { access, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, chmod, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -210,6 +211,36 @@ test('legacy data detection is path-only and non-destructive', async () => {
     await writeFile(marker, 'sentinel', 'utf8');
     assert.equal(await hasLegacyData(dshHome), true);
     assert.equal(await readFile(marker, 'utf8'), 'sentinel');
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
+  }
+});
+
+test('install adds the connector without removing it', async () => {
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-install-'));
+  const fakeBin = join(dshHome, 'bin');
+  const logPath = join(dshHome, 'dsh-commands.log');
+  const fakeDsh = join(fakeBin, 'dsh');
+  await mkdir(fakeBin);
+  await writeFile(fakeDsh, `#!${process.execPath}\nconst { appendFileSync } = require('node:fs');\nappendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');\n`);
+  await chmod(fakeDsh, 0o755);
+  try {
+    const result = spawnSync(process.execPath, [
+      'bin/dsh-whatsapp-connector.mjs', 'install', '--source', '.',
+    ], {
+      cwd: new URL('../', import.meta.url),
+      env: {
+        ...process.env,
+        DSH_HOME: dshHome,
+        PATH: `${fakeBin}:${process.env.PATH}`,
+      },
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const commands = (await readFile(logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+    assert.deepEqual(commands, [[
+      'plugin', '--profile', 'web', 'add', '--save-exact', resolve(new URL('../', import.meta.url).pathname),
+    ]]);
   } finally {
     await rm(dshHome, { recursive: true, force: true });
   }

@@ -62,13 +62,12 @@ try {
     const dshHome = process.env.DSH_HOME ?? join(homedir(), '.dsh');
     const legacy = await hasLegacyData(dshHome);
     runDsh(['plugin', '--profile', profile, 'add', '--save-exact', source]);
-    runDsh(['plugin', '--profile', profile, 'remove', PACKAGE_NAME]);
-    console.log('\nIM 机器人插件已安装。请重启 dsh web、刷新浏览器，然后打开「设置 → IM机器人」。');
+    console.log('\ndsh-whatsapp-connector 插件已安装。请重启 dsh web、刷新浏览器，然后打开「设置 → WhatsApp Connector」。');
     if (legacy) console.log(legacyDataWarning());
   } else if (command === 'uninstall') {
     if (args.length > 0) throw new Error(`无法识别的参数：${args.join(' ')}`);
     runDsh(['plugin', '--profile', profile, 'remove', PACKAGE_NAME]);
-    console.log('\nIM 机器人插件已卸载。请重启 dsh web。');
+    console.log('\ndsh-whatsapp-connector 插件已卸载。请重启 dsh web。');
   } else {
     throw new Error(`无法识别的命令：${command}`);
   }
