@@ -132,6 +132,14 @@ test('package verifier checks retained licenses and runtime artifacts', async ()
   assert.match(source, /removed channel/);
 });
 
+test('package verifier requires the active integration source path', async () => {
+  const source = await read('scripts/verify-package.mjs');
+  assert.match(source, /hostSources\.includes\("integrations', 'dsh-whatsapp-connector'"\)/);
+  assert.match(source, /hostSources\.includes\("integrations', 'dsh-whatsapp'"\)/);
+  assert.match(source, /integrations\/dsh-whatsapp-connector/);
+  assert.match(source, /integrations\/dsh-whatsapp/);
+});
+
 test('retained client metadata names WhatsApp only', async () => {
   const [locale, styles] = await Promise.all([
     read('plugin-src/client/i18n.js'),
@@ -145,6 +153,21 @@ test('retained client metadata names WhatsApp only', async () => {
   for (const selector of ['dim-logoWeixin', 'dim-logoFeishu', 'dim-logoDingtalk', 'dim-logoQq', 'dim-logoWecom', 'dim-logoTelegram', 'dim-logoOffice', 'dim-logoDiscord', 'dim-logoSlack']) {
     assert.doesNotMatch(styles, new RegExp(`\\.${selector}\\\\b`), `styles contain ${selector}`);
   }
+});
+
+test('settings navigation uses the WhatsApp Connector label', async () => {
+  const [client, locale, readme, englishReadme, cli] = await Promise.all([
+    read('plugin-src/client/index.js'),
+    read('plugin-src/client/i18n.js'),
+    read('README.md'),
+    read('README.en.md'),
+    read('bin/dsh-whatsapp-connector.mjs'),
+  ]);
+  assert.match(client, /label: \(\) => t\('WhatsApp Connector'\)/);
+  assert.match(locale, /'WhatsApp Connector': 'WhatsApp Connector'/);
+  assert.match(readme, /设置 → WhatsApp Connector/);
+  assert.match(englishReadme, /Settings → WhatsApp Connector/);
+  assert.match(cli, /设置 → WhatsApp Connector/);
 });
 
 test('active package and DSH registration use dsh-whatsapp-connector', async () => {
@@ -211,6 +234,35 @@ test('legacy data detection is path-only and non-destructive', async () => {
     await writeFile(marker, 'sentinel', 'utf8');
     assert.equal(await hasLegacyData(dshHome), true);
     assert.equal(await readFile(marker, 'utf8'), 'sentinel');
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
+  }
+});
+
+test('install preserves a legacy directory and reports separate configuration guidance', async () => {
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-legacy-install-'));
+  const fakeBin = join(dshHome, 'bin');
+  const logPath = join(dshHome, 'dsh-commands.log');
+  const fakeDsh = join(fakeBin, 'dsh');
+  const legacyRoot = join(dshHome, 'integrations', 'dsh-whatsapp');
+  const marker = join(legacyRoot, 'sentinel');
+  await mkdir(fakeBin);
+  await mkdir(legacyRoot, { recursive: true });
+  await writeFile(marker, 'do-not-touch', 'utf8');
+  await writeFile(fakeDsh, `#!${process.execPath}\\nconst { appendFileSync } = require('node:fs');\\nappendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');\\n`);
+  await chmod(fakeDsh, 0o755);
+  try {
+    const result = spawnSync(process.execPath, [
+      'bin/dsh-whatsapp-connector.mjs', 'install', '--source', '.',
+    ], {
+      cwd: new URL('../', import.meta.url),
+      env: { ...process.env, DSH_HOME: dshHome, PATH: `${fakeBin}:${process.env.PATH}` },
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /separately/);
+    assert.equal(await readFile(marker, 'utf8'), 'do-not-touch');
+    assert.deepEqual(await readdir(legacyRoot), ['sentinel']);
   } finally {
     await rm(dshHome, { recursive: true, force: true });
   }

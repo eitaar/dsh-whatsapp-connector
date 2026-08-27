@@ -4,7 +4,7 @@ export const IM_LOCALE_NAMESPACE = 'dsh-whatsapp-connector';
 
 const EN = Object.freeze({
   '$locale': 'en',
-  'IM机器人': 'IM bots',
+  'WhatsApp Connector': 'WhatsApp Connector',
   'IM机器人设置': 'IM bot settings',
   'IM 渠道': 'IM channels',
   '让 DeepSeek Harness 触手可及': 'Connecting DeepSeek Harness',

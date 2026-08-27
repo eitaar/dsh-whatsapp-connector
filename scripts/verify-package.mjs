@@ -123,6 +123,12 @@ for (const marker of LEGACY_ACTIVE_IDENTITY_MARKERS) {
     throw new Error(`active inherited identity remains: ${marker}`);
   }
 }
+if (!hostSources.includes("integrations', 'dsh-whatsapp-connector'")) {
+  throw new Error('active runtime source must use integrations/dsh-whatsapp-connector');
+}
+if (hostSources.includes("integrations', 'dsh-whatsapp'")) {
+  throw new Error('active runtime source must reject the legacy integrations/dsh-whatsapp path');
+}
 
 // DSH runtime packages use module-local Symbol keys, so a second physical copy breaks Host lookup.
 const forbiddenDshDependency = /^@deepseek-ai\/dsh-/;
@@ -166,10 +172,10 @@ const sourceSectionMarkers = [
   /name\s*:\s*["']settings\.section["']/u,
   /id\s*:\s*["']dsh-whatsapp-connector["']/u,
   /order\s*:\s*21\b/u,
-  /label\s*:\s*\(\)\s*=>\s*t\(\s*["']IM机器人["']\s*\)/u,
+  /label\s*:\s*\(\)\s*=>\s*t\(\s*["']WhatsApp Connector["']\s*\)/u,
   /locale\s*:\s*IM_LOCALE_NAMESPACE\b/u,
 ];
-const bundleSectionPattern = /name\s*:\s*["']settings\.section["']\s*,\s*id\s*:\s*["']dsh-whatsapp-connector["']\s*,\s*order\s*:\s*21\s*,\s*label\s*:\s*\(\)\s*=>\s*[$A-Z_a-z][$\w]*\(\s*["']IM(?:机器人|\\u673A\\u5668\\u4EBA)["']\s*\)\s*,\s*locale\s*:\s*(?:[$A-Z_a-z][$\w]*|["']dsh-whatsapp-connector["'])/u;
+const bundleSectionPattern = /name\s*:\s*["']settings\.section["']\s*,\s*id\s*:\s*["']dsh-whatsapp-connector["']\s*,\s*order\s*:\s*21\s*,\s*label\s*:\s*\(\)\s*=>\s*[$A-Z_a-z][$\w]*\(\s*["']WhatsApp Connector["']\s*\)\s*,\s*locale\s*:\s*(?:[$A-Z_a-z][$\w]*|["']dsh-whatsapp-connector["'])/u;
 if (sourceSectionMarkers.some((pattern) => !pattern.test(clientEntrySource))
   || !/IM_LOCALE_NAMESPACE\s*=\s*["']dsh-whatsapp-connector["']/u.test(clientSources)
   || !bundleSectionPattern.test(client)) {

@@ -160,7 +160,7 @@ export function apply(ctx) {
     name: 'settings.section',
     id: 'dsh-whatsapp-connector',
     order: 21,
-    label: () => t('IM机器人'),
+    label: () => t('WhatsApp Connector'),
     locale: IM_LOCALE_NAMESPACE,
     inject: () => ({
       whatsappRpcCall,
