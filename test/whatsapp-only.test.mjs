@@ -36,6 +36,18 @@ test('documentation describes WhatsApp only', async () => {
   for (const channel of removed) assert.doesNotMatch(readme, new RegExp(`\\| ${channel} \\|`, 'i'));
 });
 
+test('documentation installs and names the new plugin', async () => {
+  for (const path of ['README.md', 'README.en.md']) {
+    const source = await read(path);
+    assert.match(source, /dsh-whatsapp-connector/);
+    assert.match(source, /github:eitaar\/dsh-whatsapp-connector/);
+    assert.doesNotMatch(source, /@xmanrui\/dsh-im install|dsh-im install/);
+  }
+  const notice = await read('NOTICE.md');
+  assert.match(notice, /historical|upstream/i);
+  assert.match(notice, /@xmanrui\/dsh-im/);
+});
+
 test('bundle patch retains DSH compatibility identity', async () => {
   const patch = await read('cordis.patch.yml');
   assert.match(patch, /name: dsh-whatsapp-connector/);

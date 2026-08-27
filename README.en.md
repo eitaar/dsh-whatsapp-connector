@@ -15,17 +15,19 @@ The bot also supports Harness sessions, workspaces, Agent Presets, model and rea
 
 ## Installation
 
-Install the published package:
-
-```sh
-dsh plugin --profile web add -w dsh-whatsapp-connector
-```
-
-Or try the latest GitHub snapshot:
+Install the published package or the latest GitHub snapshot:
 
 ```sh
 npx -y github:eitaar/dsh-whatsapp-connector install
 ```
+
+From a checkout:
+
+```sh
+node bin/dsh-whatsapp-connector.mjs install --source .
+```
+
+The package, CLI, and plugin identity is `dsh-whatsapp-connector`; its runtime storage root is `~/.dsh/integrations/dsh-whatsapp-connector/`. If an existing `~/.dsh/integrations/dsh-whatsapp/` directory is detected, the connector only reports it for migration: it never copies, deletes, or overwrites that directory automatically. The historical upstream package [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) is retained for attribution only and is not an install target for this connector.
 
 Restart `dsh web`, refresh the browser, then open **Settings → IM Bot** and scan the WhatsApp QR code. Existing credentials, workspaces, Agent Presets, and Session bindings are preserved during upgrades. Secrets and linked-device state stay in the local protected credential/runtime stores and are never returned by status or bot-list responses.
 

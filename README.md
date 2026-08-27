@@ -15,17 +15,19 @@
 
 ## 安装
 
-安装已发布的稳定版本：
-
-```sh
-dsh plugin --profile web add -w dsh-whatsapp-connector
-```
-
-或试用最新 GitHub 版本：
+安装已发布的稳定版本，或直接从 GitHub 安装插件：
 
 ```sh
 npx -y github:eitaar/dsh-whatsapp-connector install
 ```
+
+从 checkout 安装：
+
+```sh
+node bin/dsh-whatsapp-connector.mjs install --source .
+```
+
+插件、CLI 和包身份均为 `dsh-whatsapp-connector`，运行时存储根目录为 `~/.dsh/integrations/dsh-whatsapp-connector/`。如果检测到现有 `~/.dsh/integrations/dsh-whatsapp/`，只会提示迁移：不会自动复制、删除或覆盖其中任何内容。历史上游包 [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im) 仅用于来源归属；不要将其作为本连接器的安装目标。
 
 重启 `dsh web`、刷新浏览器，然后打开「设置 → IM机器人」并扫描 WhatsApp 二维码。升级会保留已有凭据、工作区、Agent Preset 和 Session 绑定。Secret 与关联设备状态只保存在本机受保护的凭据/运行时存储中，状态和机器人列表接口不会返回它们。
 

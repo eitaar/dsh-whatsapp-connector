@@ -1,6 +1,6 @@
 # Third-party notices
 
-This project is an independent DeepSeek Harness integration and an MIT-licensed derivative of [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im). The upstream source attribution and MIT license remain in [`LICENSE`](LICENSE). It does not bundle OpenClaw and is not endorsed by Meta or WhatsApp.
+This project is the independent `dsh-whatsapp-connector` DeepSeek Harness integration and an MIT-licensed derivative of historical upstream [`@xmanrui/dsh-im`](https://github.com/xmanrui/dsh-im). The upstream source attribution and preserved MIT license text remain in [`LICENSE`](LICENSE); the active package, CLI, and plugin identity is `dsh-whatsapp-connector`. It does not bundle OpenClaw and is not endorsed by Meta or WhatsApp.
 
 ## Retained packages
 
