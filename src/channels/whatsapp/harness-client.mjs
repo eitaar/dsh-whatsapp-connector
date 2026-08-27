@@ -5,7 +5,7 @@ export class WhatsappHarnessClient extends HarnessClient {
     super({
       ...options,
       rpcIdPrefix: 'whatsapp',
-      logPrefix: 'dsh-whatsapp',
+      logPrefix: 'dsh-whatsapp-connector',
     });
   }
 }

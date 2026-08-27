@@ -1,10 +1,10 @@
 import * as React from 'react';
 
-export const IM_LOCALE_NAMESPACE = 'dsh-im';
+export const IM_LOCALE_NAMESPACE = 'dsh-whatsapp-connector';
 
 const EN = Object.freeze({
   '$locale': 'en',
-  'IM机器人': 'IM bots',
+  'WhatsApp Connector': 'WhatsApp Connector',
   'IM机器人设置': 'IM bot settings',
   'IM 渠道': 'IM channels',
   '让 DeepSeek Harness 触手可及': 'Connecting DeepSeek Harness',
@@ -338,7 +338,10 @@ const EN = Object.freeze({
 
 export const en = EN;
 export const zh = Object.freeze(Object.fromEntries(
-  Object.keys(EN).map((key) => [key, key === '$locale' ? 'zh' : key]),
+  Object.keys(EN).map((key) => [
+    key,
+    key === '$locale' ? 'zh' : key === 'WhatsApp Connector' ? 'WhatsApp 连接器' : key,
+  ]),
 ));
 
 let translate = (key) => key;

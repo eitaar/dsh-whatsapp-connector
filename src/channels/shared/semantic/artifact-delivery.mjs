@@ -115,7 +115,7 @@ export async function deliverOutboundArtifacts({
           ? ` [${failure.referenceId}]`
           : '';
         logger?.warn?.(
-          `[dsh-im:${channelKey}] result artifact delivery failed${reference} (${error?.code ?? 'unknown'})`,
+          `[dsh-whatsapp-connector:${channelKey}] result artifact delivery failed${reference} (${error?.code ?? 'unknown'})`,
         );
         let messageIds = [];
         if (typeof sendFailureNotice === 'function') {
@@ -128,7 +128,7 @@ export async function deliverOutboundArtifacts({
           } catch (noticeError) {
             if (isAbort(noticeError, signal)) throw noticeError;
             logger?.warn?.(
-              `[dsh-im:${channelKey}] unable to send the safe artifact failure notice`,
+              `[dsh-whatsapp-connector:${channelKey}] unable to send the safe artifact failure notice`,
             );
           }
         }

@@ -43,7 +43,7 @@ export function createEditableMessageStream({
       const next = splitMessageText(text, limit)[0] ?? initialText;
       inFlight = Promise.resolve(next === lastSent ? undefined : edit(messageId, next))
         .then(() => { lastSent = next; })
-        .catch((error) => logger.warn?.('[dsh-im] streamed message update failed:', error))
+        .catch((error) => logger.warn?.('[dsh-whatsapp-connector] streamed message update failed:', error))
         .finally(() => {
           inFlight = null;
           schedule();

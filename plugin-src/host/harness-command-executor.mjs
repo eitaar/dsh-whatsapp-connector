@@ -10,7 +10,7 @@ export function createHarnessCommandExecutor(ctx, provided) {
   const gateway = ctx?.typertGateway;
   if (!gateway) return undefined;
   if (typeof gateway.invoke !== 'function') {
-    throw new TypeError('dsh-im requires a callable ctx.typertGateway');
+    throw new TypeError('dsh-whatsapp-connector requires a callable ctx.typertGateway');
   }
   return (sessionId, line, options = {}) => gateway.invoke({
     namespace: 'commands',

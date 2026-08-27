@@ -59,7 +59,7 @@ export function beginStatusReaction({
     } catch (cause) {
       increment(status, 'reactionErrors');
       logger.warn?.(
-        `[dsh-im:${label}] status reaction ${kind} failed:`,
+        `[dsh-whatsapp-connector:${label}] status reaction ${kind} failed:`,
         cause?.message ?? cause?.name ?? String(cause),
       );
       return { ok: false, value: null };

@@ -5,7 +5,7 @@ import { pipeline } from 'node:stream/promises';
 
 import { t } from './i18n.mjs';
 
-const FILES_DIRECTORY = join('.dsh-im', 'inbound');
+const FILES_DIRECTORY = join('.dsh-whatsapp-connector', 'inbound');
 
 export class InboundFileError extends Error {
   constructor(code, message, userMessage = t('文件接收失败，请重新发送后再试。'), options = {}) {
@@ -190,12 +190,12 @@ export async function stageInboundFiles(message, {
 export function appendInboundFilesToPrompt(prompt, staged) {
   if (!staged?.files?.length) return prompt;
   const manifest = [
-    '<dsh_im_files>',
+    '<dsh_whatsapp_connector_files>',
     JSON.stringify({
       description: 'Files uploaded with this user message. Paths are relative to the current Harness workspace.',
       files: staged.files,
     }),
-    '</dsh_im_files>',
+    '</dsh_whatsapp_connector_files>',
   ].join('\n');
 
   if (Array.isArray(prompt)) return [...prompt, { type: 'text', text: manifest }];

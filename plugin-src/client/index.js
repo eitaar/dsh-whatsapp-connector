@@ -13,7 +13,7 @@ import {
 import { installImStyles } from './styles.js';
 import { WorkspaceDirectoryPickerContext } from './workspace-editor.js';
 
-export const name = 'im-settings';
+export const name = 'dsh-whatsapp-connector-settings';
 export const inject = ['slots', 'connection', 'locale', 'workspaces'];
 export const IM_PLUGIN_VERSION = manifest.version;
 
@@ -70,7 +70,7 @@ export function IMSettingsTab({
         tabIndex: 0,
         'aria-describedby': versionTooltipId,
       },
-        h('strong', { className: 'dim-brandName' }, 'DSH-IM'),
+        h('strong', { className: 'dim-brandName' }, 'DSH WhatsApp Connector'),
         h('p', null, '让 DeepSeek Harness 触手可及'),
         h('span', {
           id: versionTooltipId,
@@ -82,10 +82,10 @@ export function IMSettingsTab({
       h('span', { className: 'dim-githubAction' },
         h('a', {
           className: 'dim-githubLink',
-          href: 'https://github.com/xmanrui/dsh-im',
+          href: 'https://github.com/eitaar/dsh-whatsapp-connector',
           target: '_blank',
           rel: 'noopener noreferrer',
-          'aria-label': 'dsh-im GitHub',
+          'aria-label': 'dsh-whatsapp-connector GitHub',
           'aria-describedby': githubTooltipId,
         },
         h('span', null, 'GitHub'),
@@ -158,9 +158,9 @@ export function apply(ctx) {
 
   ctx.slots.inject('settings.section', () => ctx.slots.register({
     name: 'settings.section',
-    id: 'xmanrui-dsh-im',
+    id: 'dsh-whatsapp-connector',
     order: 21,
-    label: () => t('IM机器人'),
+    label: () => t('WhatsApp Connector'),
     locale: IM_LOCALE_NAMESPACE,
     inject: () => ({
       whatsappRpcCall,

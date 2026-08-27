@@ -81,7 +81,7 @@ export class WhatsappConfigStore {
   async load() {
     try {
       const normalized = this.#normalizeDocument(JSON.parse(await readFile(this.#path, 'utf8')));
-      if (!normalized) throw new Error('dsh-im WhatsApp config contains invalid account data');
+      if (!normalized) throw new Error('dsh-whatsapp-connector WhatsApp config contains invalid account data');
       this.#value = normalized;
     } catch (error) {
       if (error?.code !== 'ENOENT') throw error;

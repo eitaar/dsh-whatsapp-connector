@@ -1,5 +1,5 @@
 {
-  "name": "@xmanrui/dsh-im",
+  "name": "dsh-whatsapp-connector",
   "version": "3.0.1",
   "description": "将 WhatsApp Web 接入本机 DeepSeek Harness。 Connect WhatsApp Web to a local DeepSeek Harness.",
   "keywords": [
@@ -38,7 +38,7 @@
     "access": "public"
   },
   "bin": {
-    "dsh-im": "bin/dsh-im.mjs"
+    "dsh-whatsapp-connector": "bin/dsh-whatsapp-connector.mjs"
   },
   "main": "./lib/index.js",
   "exports": {

@@ -118,7 +118,7 @@ export class BotWorkspaceStore {
   async load() {
     try {
       const normalized = normalizeDocument(JSON.parse(await readFile(this.#path, 'utf8')));
-      if (!normalized) throw new Error('dsh-im workspace config is invalid');
+      if (!normalized) throw new Error('dsh-whatsapp-connector workspace config is invalid');
       this.#workspaces = normalized.workspaces;
       this.#agentPresets = normalized.agentPresets;
     } catch (error) {
@@ -1010,7 +1010,7 @@ export function createWorkspaceAwareController(controller, { workspaces, stateFo
           await state.clearSessions();
         } catch (error) {
           console.warn(
-            `[dsh-im] ignored session cleanup failure while deleting bot ${botId}:`,
+            `[dsh-whatsapp-connector] ignored session cleanup failure while deleting bot ${botId}:`,
             error?.message ?? error,
           );
         }

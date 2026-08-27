@@ -25,14 +25,14 @@ function harnessOrigin(webServer, configured) {
   if (configured !== undefined) return new URL(configured);
   const port = webServer?.port;
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error('dsh-im WhatsApp requires an initialized DSH webServer port');
+    throw new Error('dsh-whatsapp-connector WhatsApp requires an initialized DSH webServer port');
   }
   return new URL(`http://127.0.0.1:${port}`);
 }
 
 function pluginPaths(config) {
   const dshHome = resolve(config.dshHome ?? process.env.DSH_HOME ?? join(homedir(), '.dsh'));
-  const root = resolve(config.dataDir ?? join(dshHome, 'integrations', 'dsh-whatsapp'));
+  const root = resolve(config.dataDir ?? join(dshHome, 'integrations', 'dsh-whatsapp-connector'));
   const authRoot = resolve(config.authDir ?? join(root, 'auth'));
   const authPath = (name) => {
     if (!AUTH_DIRECTORY_PATTERN.test(name ?? '')) throw new TypeError('Invalid WhatsApp auth directory');
@@ -47,9 +47,10 @@ function pluginPaths(config) {
 }
 
 export async function createProductionController(ctx, config = {}, internals = {}) {
-  if (!ctx?.webServer) throw new TypeError('dsh-im WhatsApp requires ctx.webServer');
+  if (!ctx?.webServer) throw new TypeError('dsh-whatsapp-connector WhatsApp requires ctx.webServer');
   const logger = typeof ctx.logger === 'function'
-    ? ctx.logger('dsh-im:whatsapp') : (ctx.logger ?? console);
+    ? ctx.logger('dsh-whatsapp-connector:whatsapp')
+    : (ctx.logger ?? console);
   const agentPresetCatalog = () => listAgentPresetCatalog(ctx);
   const ConfigStore = internals.ConfigStore ?? WhatsappConfigStore;
   const StateStore = internals.StateStore ?? WhatsappStateStore;

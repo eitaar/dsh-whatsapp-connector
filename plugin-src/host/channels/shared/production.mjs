@@ -17,14 +17,16 @@ export function harnessOrigin(webServer, configured) {
   if (configured !== undefined) return new URL(configured);
   const port = webServer?.port;
   if (!Number.isInteger(port) || port < 1 || port > 65_535) {
-    throw new Error('dsh-im token channel requires an initialized DSH webServer port');
+    throw new Error('dsh-whatsapp-connector token channel requires an initialized DSH webServer port');
   }
   return new URL(`http://127.0.0.1:${port}`);
 }
 
 export function pluginPaths(config, channel) {
   const dshHome = resolve(config.dshHome ?? process.env.DSH_HOME ?? join(homedir(), '.dsh'));
-  const root = resolve(config.dataDir ?? join(dshHome, 'integrations', `dsh-${channel}`));
+  const root = resolve(config.dataDir ?? join(dshHome, 'integrations', channel === 'whatsapp'
+    ? 'dsh-whatsapp-connector'
+    : `dsh-${channel}`));
   return {
     config: resolve(config.configPath ?? join(root, 'config.json')),
     bots: resolve(config.botsDir ?? join(root, 'bots')),
@@ -36,8 +38,8 @@ export async function createTokenProductionController(ctx, config, internals, de
   const {
     channel, ConfigStore, StateStore, HarnessClient, Controller, Runtime, runtimeOptions,
   } = definitions;
-  if (!ctx?.credentials) throw new TypeError(`dsh-im ${channel} requires ctx.credentials`);
-  if (!ctx?.webServer) throw new TypeError(`dsh-im ${channel} requires ctx.webServer`);
+  if (!ctx?.credentials) throw new TypeError(`dsh-whatsapp-connector ${channel} requires ctx.credentials`);
+  if (!ctx?.webServer) throw new TypeError(`dsh-whatsapp-connector ${channel} requires ctx.webServer`);
 
   const ResolvedConfigStore = internals.ConfigStore ?? ConfigStore;
   const ResolvedStateStore = internals.StateStore ?? StateStore;
@@ -47,11 +49,11 @@ export async function createTokenProductionController(ctx, config, internals, de
   const channelRuntimeOptions = typeof runtimeOptions === 'function' ? runtimeOptions(config) : {};
   if (!channelRuntimeOptions || typeof channelRuntimeOptions !== 'object'
     || Array.isArray(channelRuntimeOptions)) {
-    throw new TypeError(`dsh-im ${channel} runtimeOptions must return an object`);
+    throw new TypeError(`dsh-whatsapp-connector ${channel} runtimeOptions must return an object`);
   }
   const createSupervisor = internals.createConnectionSupervisor ?? createTokenConnectionSupervisor;
   const logger = typeof ctx.logger === 'function'
-    ? ctx.logger(`dsh-im:${channel}`) : (ctx.logger ?? console);
+    ? ctx.logger(`dsh-whatsapp-connector:${channel}`) : (ctx.logger ?? console);
   const agentPresetCatalog = () => listAgentPresetCatalog(ctx);
   const paths = pluginPaths(config, channel);
   const configStore = await new ResolvedConfigStore(paths.config).load();

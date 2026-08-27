@@ -220,7 +220,7 @@ export class HarnessApprovalQueue {
       || !validHarnessApproval(payload)
       || payload.sessionId !== interaction.sessionId
       || typeof interaction.respond !== 'function') {
-      this.#logger.warn?.(`[dsh-im:${this.#label}] ignored an invalid Harness approval`);
+      this.#logger.warn?.(`[dsh-whatsapp-connector:${this.#label}] ignored an invalid Harness approval`);
       return true;
     }
 
@@ -241,7 +241,7 @@ export class HarnessApprovalQueue {
     const key = cleanText(context?.key);
     const actor = cleanText(context?.actor);
     if (!key || !actor || typeof send !== 'function') {
-      this.#logger.warn?.(`[dsh-im:${this.#label}] ignored an approval without a reply route`);
+      this.#logger.warn?.(`[dsh-whatsapp-connector:${this.#label}] ignored an approval without a reply route`);
       await this.#rejectInteraction(interaction, payload);
       return true;
     }
@@ -340,7 +340,7 @@ export class HarnessApprovalQueue {
             await pending.send(t(APPROVAL_RESOLVED_TEXT)).catch(() => undefined);
           }
         } else {
-          this.#logger.warn?.(`[dsh-im:${this.#label}] failed to reject a closing approval:`, error);
+          this.#logger.warn?.(`[dsh-whatsapp-connector:${this.#label}] failed to reject a closing approval:`, error);
         }
       }
     }));
@@ -386,7 +386,7 @@ export class HarnessApprovalQueue {
       }
       if (pending.inactive) return;
       pending.submitting = false;
-      this.#logger.error?.(`[dsh-im:${this.#label}] failed to submit an approval:`, error);
+      this.#logger.error?.(`[dsh-whatsapp-connector:${this.#label}] failed to submit an approval:`, error);
       await pending.send(t('审批提交失败，请重新回复「批准」或「拒绝」。')).catch(() => undefined);
       return;
     }
@@ -419,7 +419,7 @@ export class HarnessApprovalQueue {
       await this.#present(pending);
     } catch (error) {
       this.#logger.error?.(
-        `[dsh-im:${this.#label}] failed to present the next approval:`,
+        `[dsh-whatsapp-connector:${this.#label}] failed to present the next approval:`,
         error,
       );
       try {

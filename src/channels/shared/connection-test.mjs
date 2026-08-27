@@ -2,7 +2,7 @@ import { t } from './i18n.mjs';
 
 const targets = new WeakMap();
 
-export const CONNECTION_TEST_STATE_IDENTITY = Symbol('dsh-im.connection-test-state-identity');
+export const CONNECTION_TEST_STATE_IDENTITY = Symbol('dsh-whatsapp-connector.connection-test-state-identity');
 
 function stateIdentity(state) {
   return state?.[CONNECTION_TEST_STATE_IDENTITY] ?? state;

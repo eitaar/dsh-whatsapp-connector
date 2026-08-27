@@ -4,9 +4,9 @@ import { copyFile, lstat, mkdtemp, open, realpath, unlink } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { basename, extname, isAbsolute, join, resolve } from 'node:path';
 
-export const OUTBOUND_ARTIFACT_TOOL = 'dsh_im_return_file';
+export const OUTBOUND_ARTIFACT_TOOL = 'dsh_whatsapp_connector_return_file';
 
-const ARTIFACT_KIND = 'dsh-im-outbound-artifact';
+const ARTIFACT_KIND = 'dsh-whatsapp-connector-outbound-artifact';
 const ARTIFACT_READ_CHUNK_BYTES = 64 * 1024;
 const MIME_BY_EXTENSION = new Map([
   ['.csv', 'text/csv'],
@@ -35,7 +35,7 @@ const artifactProviderSettlements = new WeakMap();
 let managedSnapshotDirectoryPromise;
 
 function managedSnapshotDirectory() {
-  managedSnapshotDirectoryPromise ??= mkdtemp(join(tmpdir(), 'dsh-im-outbound-'));
+  managedSnapshotDirectoryPromise ??= mkdtemp(join(tmpdir(), 'dsh-whatsapp-connector-outbound-'));
   return managedSnapshotDirectoryPromise;
 }
 
@@ -652,7 +652,7 @@ export function installOutboundArtifactTool(ctx, { registry = outboundArtifactRe
   ctx.on('session/event', (session, event) => registry.observeSessionEvent(session, event));
   ctx.on('session/disposed', (session) => registry.disposeSession(session));
   ctx.systemPrompt.section({
-    name: 'dsh-im:return-file',
+    name: 'dsh-whatsapp-connector:return-file',
     order: 115,
     text: `When the user asks to receive a file or generated image, call ${OUTBOUND_ARTIFACT_TOOL} with its path. Existing files can be sent directly; do not recreate or rename a file solely for delivery.`,
   });

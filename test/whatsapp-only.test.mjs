@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readdir, readFile } from 'node:fs/promises';
+import { access, chmod, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
+import { spawnSync } from 'node:child_process';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 
 const root = new URL('../', import.meta.url);
 const read = (path) => readFile(new URL(path, root), 'utf8');
@@ -34,9 +37,40 @@ test('documentation describes WhatsApp only', async () => {
   for (const channel of removed) assert.doesNotMatch(readme, new RegExp(`\\| ${channel} \\|`, 'i'));
 });
 
+test('documentation installs and names the new plugin', async () => {
+  const expectations = {
+    'README.md': {
+      separateConfiguration: /请单独配置新的连接器/,
+      legacyChoice: /保留、停用或移除旧安装/,
+      nonDestructive: /不会自动复制、删除或覆盖/,
+    },
+    'README.en.md': {
+      separateConfiguration: /configure the new connector separately/i,
+      legacyChoice: /choose whether to keep, disable, or remove the old installation/i,
+      nonDestructive: /never copies, deletes, or overwrites/i,
+    },
+  };
+
+  for (const [path, expected] of Object.entries(expectations)) {
+    const source = await read(path);
+    assert.match(source, /dsh-whatsapp-connector/);
+    assert.match(source, /npx -y github:eitaar[/]dsh-whatsapp-connector install/);
+    assert.match(source, /node bin[/]dsh-whatsapp-connector\.mjs install --source \./);
+    assert.match(source, /~[/]\.dsh[/]integrations[/]dsh-whatsapp-connector[/]/);
+    assert.match(source, expected.nonDestructive);
+    assert.match(source, expected.separateConfiguration);
+    assert.match(source, expected.legacyChoice);
+    assert.doesNotMatch(source, /@xmanrui[/]dsh-im install|dsh-im install/);
+    assert.doesNotMatch(source, /alt=[\"'][^\"']*DSH-IM[^\"']*[\"']/i);
+  }
+  const notice = await read('NOTICE.md');
+  assert.match(notice, /historical|upstream/i);
+  assert.match(notice, /@xmanrui[/]dsh-im/);
+});
+
 test('bundle patch retains DSH compatibility identity', async () => {
   const patch = await read('cordis.patch.yml');
-  assert.match(patch, /name: '@xmanrui\/dsh-im'/);
+  assert.match(patch, /name: dsh-whatsapp-connector/);
 });
 
 test('third-party notices identify retained packages and copyleft assets', async () => {
@@ -98,6 +132,14 @@ test('package verifier checks retained licenses and runtime artifacts', async ()
   assert.match(source, /removed channel/);
 });
 
+test('package verifier requires the active integration source path', async () => {
+  const source = await read('scripts/verify-package.mjs');
+  assert.match(source, /hostSources\.includes\("integrations', 'dsh-whatsapp-connector'"\)/);
+  assert.match(source, /hostSources\.includes\("integrations', 'dsh-whatsapp'"\)/);
+  assert.match(source, /integrations\/dsh-whatsapp-connector/);
+  assert.match(source, /integrations\/dsh-whatsapp/);
+});
+
 test('retained client metadata names WhatsApp only', async () => {
   const [locale, styles] = await Promise.all([
     read('plugin-src/client/i18n.js'),
@@ -110,5 +152,231 @@ test('retained client metadata names WhatsApp only', async () => {
   ]) assert.doesNotMatch(locale, new RegExp(stale), `locale contains ${stale}`);
   for (const selector of ['dim-logoWeixin', 'dim-logoFeishu', 'dim-logoDingtalk', 'dim-logoQq', 'dim-logoWecom', 'dim-logoTelegram', 'dim-logoOffice', 'dim-logoDiscord', 'dim-logoSlack']) {
     assert.doesNotMatch(styles, new RegExp(`\\.${selector}\\\\b`), `styles contain ${selector}`);
+  }
+});
+
+test('settings navigation uses the WhatsApp Connector label', async () => {
+  const [client, locale, readme, englishReadme, cli, { zh }] = await Promise.all([
+    read('plugin-src/client/index.js'),
+    read('plugin-src/client/i18n.js'),
+    read('README.md'),
+    read('README.en.md'),
+    read('bin/dsh-whatsapp-connector.mjs'),
+    import('../plugin-src/client/i18n.js'),
+  ]);
+  assert.match(client, /label: \(\) => t\('WhatsApp Connector'\)/);
+  assert.match(locale, /'WhatsApp Connector': 'WhatsApp Connector'/);
+  assert.equal(zh['WhatsApp Connector'], 'WhatsApp 连接器');
+  assert.match(readme, /设置 → WhatsApp 连接器/);
+  assert.match(englishReadme, /Settings → WhatsApp Connector/);
+  assert.match(cli, /设置 → WhatsApp 连接器/);
+});
+
+test('active package and DSH registration use dsh-whatsapp-connector', async () => {
+  const packageManifest = JSON.parse(await read('package.json'));
+  assert.equal(packageManifest.name, 'dsh-whatsapp-connector');
+  assert.deepEqual(packageManifest.bin, { 'dsh-whatsapp-connector': 'bin/dsh-whatsapp-connector.mjs' });
+  assert.equal(packageManifest.exports['./package.json'], './package.json');
+
+  const lock = JSON.parse(await read('package-lock.json'));
+  assert.equal(lock.name, 'dsh-whatsapp-connector');
+  assert.equal(lock.packages[''].name, 'dsh-whatsapp-connector');
+  assert.match(await read('cordis.patch.yml'), /id: dsh-whatsapp-connector/);
+  assert.match(await read('cordis.patch.yml'), /name: dsh-whatsapp-connector/);
+  assert.match(await read('plugin-src/client/build.mjs'), /'dsh-whatsapp-connector'/);
+  assert.match(await read('plugin-src/client/index.js'), /id: 'dsh-whatsapp-connector'/);
+  assert.match(await read('plugin-src/host/index.mjs'), /export const name = 'dsh-whatsapp-connector-host'/);
+
+  const activeSources = await Promise.all([
+    read('package.json'),
+    read('package-lock.json'),
+    read('cordis.patch.yml'),
+    read('plugin-src/client/build.mjs'),
+    read('plugin-src/client/index.js'),
+    read('plugin-src/host/index.mjs'),
+  ]);
+  for (const source of activeSources) {
+    for (const marker of ['@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'DSH_IM_']) {
+      assert.doesNotMatch(source, new RegExp(marker), marker);
+    }
+  }
+});
+
+test('active runtime paths use the new integration namespace', async () => {
+  const productionSources = await Promise.all([
+    read('plugin-src/host/channels/whatsapp/production.mjs'),
+    read('plugin-src/host/channels/shared/production.mjs'),
+  ]);
+  assert.match(productionSources[0], /integrations', 'dsh-whatsapp-connector'/);
+  assert.doesNotMatch(productionSources[0], /integrations', 'dsh-whatsapp'/);
+  assert.doesNotMatch(productionSources[1], /integrations', 'dsh-whatsapp'/);
+
+  const { pluginPaths } = await import('../plugin-src/host/channels/shared/production.mjs');
+  const paths = pluginPaths({ dshHome: '/tmp/dsh-whatsapp-connector-test' }, 'whatsapp');
+  assert.match(paths.config, /integrations\/dsh-whatsapp-connector\/config\.json$/);
+});
+
+test('renamed CLI is published and inherited CLI is absent', async () => {
+  await access(new URL('../bin/dsh-whatsapp-connector.mjs', import.meta.url));
+  await assert.rejects(
+    access(new URL('../bin/dsh-im.mjs', import.meta.url)),
+    { code: 'ENOENT' },
+  );
+});
+
+test('legacy data detection is path-only and non-destructive', async () => {
+  const { hasLegacyData } = await import('../bin/migration.mjs');
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-rename-'));
+  const legacyRoot = join(dshHome, 'integrations', 'dsh-whatsapp');
+  const marker = join(legacyRoot, 'state.json');
+  try {
+    assert.equal(await hasLegacyData(dshHome), false);
+    await mkdir(legacyRoot, { recursive: true });
+    assert.equal(await hasLegacyData(dshHome), true);
+    await writeFile(marker, 'sentinel', 'utf8');
+    assert.equal(await hasLegacyData(dshHome), true);
+    assert.equal(await readFile(marker, 'utf8'), 'sentinel');
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
+  }
+});
+
+test('install preserves a legacy directory and reports separate configuration guidance', async () => {
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-legacy-install-'));
+  const fakeBin = join(dshHome, 'bin');
+  const logPath = join(dshHome, 'dsh-commands.log');
+  const fakeDsh = join(fakeBin, 'dsh');
+  const legacyRoot = join(dshHome, 'integrations', 'dsh-whatsapp');
+  const marker = join(legacyRoot, 'sentinel');
+  await mkdir(fakeBin);
+  await mkdir(legacyRoot, { recursive: true });
+  await writeFile(marker, 'do-not-touch', 'utf8');
+  await writeFile(fakeDsh, `#!${process.execPath}
+const { appendFileSync } = require('node:fs');
+appendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');
+`);
+  await chmod(fakeDsh, 0o755);
+  try {
+    const result = spawnSync(process.execPath, [
+      'bin/dsh-whatsapp-connector.mjs', 'install', '--source', '.',
+    ], {
+      cwd: new URL('../', import.meta.url),
+      env: { ...process.env, DSH_HOME: dshHome, PATH: `${fakeBin}:${process.env.PATH}` },
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    assert.match(result.stdout, /separately/);
+    assert.equal(await readFile(marker, 'utf8'), 'do-not-touch');
+    assert.deepEqual(await readdir(legacyRoot), ['sentinel']);
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
+  }
+});
+
+test('install adds the connector without removing it', async () => {
+  const dshHome = await mkdtemp(join(tmpdir(), 'dsh-whatsapp-install-'));
+  const fakeBin = join(dshHome, 'bin');
+  const logPath = join(dshHome, 'dsh-commands.log');
+  const fakeDsh = join(fakeBin, 'dsh');
+  await mkdir(fakeBin);
+  await writeFile(fakeDsh, `#!${process.execPath}\nconst { appendFileSync } = require('node:fs');\nappendFileSync(${JSON.stringify(logPath)}, JSON.stringify(process.argv.slice(2)) + '\\n');\n`);
+  await chmod(fakeDsh, 0o755);
+  try {
+    const result = spawnSync(process.execPath, [
+      'bin/dsh-whatsapp-connector.mjs', 'install', '--source', '.',
+    ], {
+      cwd: new URL('../', import.meta.url),
+      env: {
+        ...process.env,
+        DSH_HOME: dshHome,
+        PATH: `${fakeBin}:${process.env.PATH}`,
+      },
+      encoding: 'utf8',
+    });
+    assert.equal(result.status, 0, result.stderr);
+    const commands = (await readFile(logPath, 'utf8')).trim().split('\n').map((line) => JSON.parse(line));
+    assert.equal(commands.filter((command) => command.includes('add')).length, 1);
+    assert.equal(commands.filter((command) => command.includes('remove')).length, 0);
+    assert.deepEqual(commands, [[
+      'plugin', '--profile', 'web', 'add', '--save-exact', resolve(new URL('../', import.meta.url).pathname),
+    ]]);
+  } finally {
+    await rm(dshHome, { recursive: true, force: true });
+  }
+});
+
+test('generated bundles contain the new identity only', async () => {
+  const host = await read('lib/index.js');
+  const client = await read('lib/client.js');
+  assert.match(host, /dsh-whatsapp-connector/);
+  assert.match(client, /dsh-whatsapp-connector/);
+  assert.doesNotMatch(host, /xmanrui-dsh-im|@xmanrui\/dsh-im/);
+  assert.doesNotMatch(client, /xmanrui-dsh-im|@xmanrui\/dsh-im/);
+  assert.doesNotMatch(host, /dsh-im-host|dsh-im failed|DSH_IM_LANGUAGE/);
+  assert.doesNotMatch(client, /dsh-im-settings|DSH_IM_CLIENT_ID/);
+});
+
+test('host artifact protocol uses only the renamed artifact and inbound tags', async () => {
+  const sources = await Promise.all([
+    read('src/channels/shared/semantic/artifact.mjs'),
+    read('src/channels/shared/inbound-file.mjs'),
+    read('lib/index.js'),
+  ]);
+  assert.match(sources[0], /dsh_whatsapp_connector_return_file/);
+  assert.match(sources[2], /dsh_whatsapp_connector_return_file/);
+  assert.match(sources[1], /<dsh_whatsapp_connector_files>|<\/dsh_whatsapp_connector_files>/);
+  assert.match(sources[2], /<dsh_whatsapp_connector_files>|<\/dsh_whatsapp_connector_files>/);
+  for (const source of sources) {
+    assert.doesNotMatch(source, /dsh_im_return_file|<dsh_im_files>|<\/dsh_im_files>/);
+  }
+});
+
+test('client branding links to the eitaar repository in source and bundle', async () => {
+  const [source, client] = await Promise.all([
+    read('plugin-src/client/index.js'),
+    read('lib/client.js'),
+  ]);
+  for (const content of [source, client]) {
+    assert.match(content, /https:\/\/github\.com\/eitaar\/dsh-whatsapp-connector/);
+    assert.doesNotMatch(content, /https:\/\/github\.com\/xmanrui\/dsh-whatsapp-connector/);
+  }
+});
+
+test('verifier covers CLI, runtime, lock root, and inherited markers', async () => {
+  const verifier = await read('scripts/verify-package.mjs');
+  const normalized = verifier.replaceAll('\\/', '/');
+  assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
+  assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);
+  assert.match(verifier, /lock\.packages\?\.\[''\]\?\.name/);
+  assert.match(verifier, /LEGACY_ACTIVE_IDENTITY_MARKERS/);
+  assert.match(verifier, /activeIdentityText\.includes\(marker\)/);
+  assert.doesNotMatch(verifier, /name: '@xmanrui\/dsh-im'/);
+});
+
+test('verifier uses centralized legacy markers and active sources have no old registration', async () => {
+  const verifier = await read('scripts/verify-package.mjs');
+  const normalized = verifier.replaceAll('\\/', '/');
+  const { LEGACY_ACTIVE_IDENTITY_MARKERS } = await import('../bin/migration.mjs');
+  assert.match(verifier, /LEGACY_ACTIVE_IDENTITY_MARKERS/);
+  assert.match(verifier, /from ['\"]\.\.\/bin\/migration\.mjs['\"]/);
+  assert.ok(Object.isFrozen(LEGACY_ACTIVE_IDENTITY_MARKERS));
+  assert.deepEqual(LEGACY_ACTIVE_IDENTITY_MARKERS, [
+    '@xmanrui/dsh-im', 'xmanrui-dsh-im', 'dsh-im-host', 'dsh-im-settings',
+    'DSH_IM_CLIENT_ID', 'DSH_IM_LANGUAGE', 'dsh_im_return_file',
+    '<dsh_im_files>', '</dsh_im_files>',
+  ]);
+  assert.match(verifier, /readFile\(resolve\(root, 'bin\/dsh-whatsapp-connector\.mjs'\), 'utf8'\)/);
+  assert.match(verifier, /readSourceTree\(resolve\(root, 'src'\)\)/);
+  assert.match(verifier, /lock\.packages\?\.\[''\]\?\.name/);
+  assert.ok(normalized.includes('LEGACY_ACTIVE_IDENTITY_MARKERS'));
+  const activeSources = await Promise.all([
+    read('package.json'), read('package-lock.json'), read('cordis.patch.yml'),
+    read('bin/dsh-whatsapp-connector.mjs'), read('plugin-src/client/index.js'),
+    read('plugin-src/host/index.mjs'), read('lib/client.js'), read('lib/index.js'),
+  ]);
+  for (const source of activeSources) {
+    for (const marker of LEGACY_ACTIVE_IDENTITY_MARKERS) {
+      assert.doesNotMatch(source, new RegExp(marker), marker);
+    }
   }
 });
