@@ -81,4 +81,4 @@ Final fix-round verification output:
 - `git diff --check`: exit 0; no output.
 - Final active-name audit: exit 0; no output in non-explicitly-allowed contexts.
 
-The final report update is documentation-only and remains uncommitted pending its report commit; no push, live relay restart, `/home/ubuntu/.dsh` modification, or runtime/auth state change was performed.
+The final report update is documentation-only and was committed separately; no push, live relay restart, `/home/ubuntu/.dsh` modification, or runtime/auth state change was performed.
