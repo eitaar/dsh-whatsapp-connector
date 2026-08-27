@@ -121,3 +121,29 @@ Exact verification results:
 - `git diff --check`: exit 0; no output.
 
 No `/home/ubuntu/.dsh` modification, live relay restart, push, subagent dispatch, or runtime/auth state change was performed.
+
+## Final fix round: protocol rename review findings
+
+Date: 2026-08-27
+
+Implemented the whole-branch protocol corrections:
+
+- Renamed `OUTBOUND_ARTIFACT_TOOL` to `dsh_whatsapp_connector_return_file` in `src/channels/shared/semantic/artifact.mjs`; all active references and generated `lib/index.js` now use the new tool name.
+- Renamed inbound prompt tags to `<dsh_whatsapp_connector_files>` and `</dsh_whatsapp_connector_files>` in `src/channels/shared/inbound-file.mjs`; generated `lib/index.js` includes only the new tags.
+- Added `dsh_im_return_file`, `<dsh_im_files>`, and `</dsh_im_files>` to centralized `LEGACY_ACTIVE_IDENTITY_MARKERS`; `scripts/verify-package.mjs` scans retained source and generated bundles through that list.
+- Added focused source/generated Host artifact assertions proving the new protocol names are present and old active protocol names are absent.
+
+Exact verification results:
+
+- `node --test test/whatsapp-only.test.mjs`: exit 0; 26 passed, 0 failed.
+- `npm run check`: exit 0; rebuilt `lib/client.js` and `lib/index.js`; 29 passed, 0 failed; verifier output `Verified dsh-whatsapp-connector package artifacts.`
+- `npm test`: exit 0; 29 passed, 0 failed.
+- `npm pack --dry-run`: exit 0; `dsh-whatsapp-connector-3.0.1.tgz`; name `dsh-whatsapp-connector`; version `3.0.1`; 95 files.
+- `node scripts/verify-package.mjs`: exit 0; output `Verified dsh-whatsapp-connector package artifacts.`
+- `git diff --check`: exit 0; no output.
+- Active-name audit: exit 0; no output using the explicitly allowed-context exclusions.
+
+## Final whole-branch review
+
+- Reviewed the complete rename through `847f0e1`; verdict Ready with no Critical or Important issues.
+- The remaining minor notes were this report’s pending documentation update and the verifier’s tarball-inspection limitation; `npm pack --dry-run` inspection separately covered the published contents.
